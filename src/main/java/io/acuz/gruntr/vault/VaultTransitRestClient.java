@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -13,16 +12,22 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public final class VaultTransitRestClient {
+    private static final String HEADER_X_VAULT_TOKEN = "X-Vault-Token";
+    private static final String HEADER_ACCEPT = "Accept";
+    private static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     private final ObjectMapper mapper = new ObjectMapper();
     private final JsonFactory factory = mapper.getFactory();
     private final String host;
     private final String token;
     private final String transitPath;
+    private final String transitKeyName;
+
 
     private VaultTransitRestClient(Builder builder) {
         this.host = builder.host;
         this.token = builder.token;
         this.transitPath = builder.transitPath;
+        this.transitKeyName = builder.transitKeyName;
     }
 
     public static Builder builder() {
@@ -38,9 +43,9 @@ public final class VaultTransitRestClient {
         var data = "{\"plaintext\": \"" + Base64.getEncoder().encodeToString(unencryptedData) + "\"}";
 
         var request = HttpRequest.newBuilder()
-                .uri(URI.create(this.host + "/v1/" + this.transitPath + "/encrypt/appkey"))
-                .header("X-Vault-Token", this.token)
-                .header("Accept", "application/json")
+                .uri(VaultTransitEndpoint.ENCRYPT.uri(this.host, this.transitPath, transitKeyName))
+                .header(HEADER_X_VAULT_TOKEN, this.token)
+                .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .build();
 
@@ -78,9 +83,9 @@ public final class VaultTransitRestClient {
         var data = "{\"ciphertext\": \"" + encryptedMasterKey + "\"}";
 
         var request = HttpRequest.newBuilder()
-                .uri(URI.create(this.host + "/v1/" + this.transitPath + "/decrypt/appkey"))
-                .header("X-Vault-Token", this.token)
-                .header("Accept", "application/json")
+                .uri(VaultTransitEndpoint.DECRYPT.uri(this.host, this.transitPath, transitKeyName))
+                .header(HEADER_X_VAULT_TOKEN, this.token)
+                .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .build();
 
@@ -115,6 +120,8 @@ public final class VaultTransitRestClient {
         private String token;
         private String transitPath;
 
+        private String transitKeyName;
+
         public VaultTransitRestClient build() {
             return new VaultTransitRestClient(this);
         }
@@ -131,6 +138,12 @@ public final class VaultTransitRestClient {
 
         public Builder transitPath(String hcTransitPath) {
             this.transitPath = hcTransitPath;
+            return this;
+        }
+
+        public Builder transitKeyName(String hcTransitKeyName) {
+            this.transitKeyName = hcTransitKeyName;
+
             return this;
         }
     }

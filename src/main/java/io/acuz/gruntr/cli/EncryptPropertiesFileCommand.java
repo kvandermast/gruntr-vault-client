@@ -28,6 +28,7 @@ public final class EncryptPropertiesFileCommand implements Command {
                     .host(this.properties.getHcServer())
                     .token(this.properties.getHcToken())
                     .transitPath(this.properties.getHcTransitPath())
+                    .transitKeyName(this.properties.getHcTransitKeyName())
                     .build();
 
             var originalProperties = new Properties();
@@ -37,6 +38,10 @@ public final class EncryptPropertiesFileCommand implements Command {
             originalProperties.forEach((key, value) -> encryptedProperties.put(
                     key,
                     vaultClient.encrypt(((String) value).getBytes())));
+
+            encryptedProperties.put("gruntr__vault_host", this.properties.getHcServer());
+            encryptedProperties.put("gruntr__vault_transit_path", this.properties.getHcTransitPath());
+            encryptedProperties.put("gruntr__vault_transit_key", this.properties.getHcTransitKeyName());
 
             if (null == properties.getOutputFilePath()) {
                 encryptedProperties.store(System.out, "");

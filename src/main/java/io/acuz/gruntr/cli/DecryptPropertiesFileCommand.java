@@ -24,20 +24,37 @@ public final class DecryptPropertiesFileCommand implements Command {
     @Override
     public void run() {
         try (var fileInputStream = new FileInputStream(this.properties.getInputFilePath().toFile())) {
+            var originalProperties = new Properties();
+            originalProperties.load(fileInputStream);
+
+            String vaultTransitKey = originalProperties.getProperty("gruntr__vault_transit_key");
+            String vaultHost = originalProperties.getProperty("gruntr__vault_host");
+            String vaultTransitPath = originalProperties.getProperty("gruntr__vault_transit_path");
+
+            if (!this.properties.getHcTransitKeyName().equals(vaultTransitKey)
+                    || !this.properties.getHcServer().equals(vaultHost)
+                    || !this.properties.getHcTransitPath().equals(vaultTransitPath)) {
+                throw new IllegalStateException("Configuration mismatch");
+            }
+
             var vaultClient = VaultTransitRestClient.builder()
-                    .host(this.properties.getHcServer())
+                    .host(vaultHost)
                     .token(this.properties.getHcToken())
-                    .transitPath(this.properties.getHcTransitPath())
+                    .transitPath(vaultTransitPath)
+                    .transitKeyName(vaultTransitKey)
                     .build();
 
-            var originalProperties = new Properties();
             var encryptedProperties = new Properties();
 
-            originalProperties.load(fileInputStream);
-            originalProperties.forEach((key, value) -> encryptedProperties.put(
-                    key,
-                    new String(vaultClient.decrypt((String) value))
-            ));
+            originalProperties.forEach((key, value) -> {
+                var kn = (String) key;
+
+                if (!kn.toLowerCase().startsWith("gruntr__")) {
+                    encryptedProperties.put(
+                            key,
+                            new String(vaultClient.decrypt((String) value)));
+                }
+            });
 
             if (null == properties.getOutputFilePath()) {
                 encryptedProperties.store(System.out, "");

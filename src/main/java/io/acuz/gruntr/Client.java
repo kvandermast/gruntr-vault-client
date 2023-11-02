@@ -5,7 +5,6 @@ import io.acuz.gruntr.vault.VaultTransitRestClient;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -39,30 +38,36 @@ public final class Client {
     }
 
     public Properties getDecryptedProperties() {
-        var vault = VaultTransitRestClient.builder().build();
-        var masterKey = vault.decrypt(this.encryptedProperties.getProperty("sops_hc_vault__list_0__map_enc"));
+        var originalProperties = this.getEncryptedProperties();
+
+        String vaultTransitKey = originalProperties.getProperty("gruntr__vault_transit_key");
+        String vaultHost = originalProperties.getProperty("gruntr__vault_host");
+        String vaultTransitPath = originalProperties.getProperty("gruntr__vault_transit_path");
+
+
+        var vault = VaultTransitRestClient.builder()
+                .host(vaultHost)
+                .token("root")
+                .transitPath(vaultTransitPath)
+                .transitKeyName(vaultTransitKey)
+                .build();
+
         var properties = new Properties();
 
-        if (masterKey.length > 0) {
-            var encryptedProperties = this.getEncryptedProperties();
 
-            encryptedProperties.forEach((key, val) -> {
-                if (val instanceof String) {
-                    var stringValue = ((String) val).trim();
+        originalProperties.forEach((key, val) -> {
+            if (val instanceof String) {
+                var stringValue = ((String) val).trim();
 
-                    if (stringValue.startsWith("ENC[") && stringValue.endsWith("]")) {
-                        // var x = EncryptedProperty.of(stringValue);
-
-                        //System.out.println("---->> " + x.decrypt(masterKey));
-                    } else {
-                        // non-encrypted value
-                        properties.put(key, val);
-                    }
+                if (stringValue.startsWith("vault:")) {
+                    properties.put(key, new String(vault.decrypt(stringValue)));
+                } else if (!((String) key).startsWith("gruntr__")) {
+                    // non-encrypted value
+                    properties.put(key, val);
                 }
-            });
-        }
+            }
+        });
 
-        Arrays.fill(masterKey, (byte) 0);
 
         return properties;
     }
@@ -70,12 +75,12 @@ public final class Client {
     public Properties getEncryptedProperties() {
         var properties = (Properties) this.encryptedProperties.clone();
 
-        final var keys = properties.keySet();
-
-        for (Object key : keys) {
-            if (key instanceof String && ((String) key).startsWith("sops_"))
-                properties.remove(key);
-        }
+//        final var keys = properties.keySet();
+//
+//        for (Object key : keys) {
+//            if (key instanceof String && ((String) key).startsWith("gruntr__"))
+//                properties.remove(key);
+//        }
 
         return properties;
     }
