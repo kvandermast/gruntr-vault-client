@@ -20,6 +20,9 @@ public final class CommandFactory {
                         .build();
 
             case "decrypt":
+                return DecryptPropertiesFileCommand.builder()
+                        .parameters(q)
+                        .build();
             default:
                 throw new IllegalArgumentException("unknown action: " + action);
         }

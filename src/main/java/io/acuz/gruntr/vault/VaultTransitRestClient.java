@@ -12,14 +12,14 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public final class VaultRestClient {
+public final class VaultTransitRestClient {
     private final ObjectMapper mapper = new ObjectMapper();
     private final JsonFactory factory = mapper.getFactory();
     private final String host;
     private final String token;
     private final String transitPath;
 
-    private VaultRestClient(Builder builder) {
+    private VaultTransitRestClient(Builder builder) {
         this.host = builder.host;
         this.token = builder.token;
         this.transitPath = builder.transitPath;
@@ -115,8 +115,8 @@ public final class VaultRestClient {
         private String token;
         private String transitPath;
 
-        public VaultRestClient build() {
-            return new VaultRestClient(this);
+        public VaultTransitRestClient build() {
+            return new VaultTransitRestClient(this);
         }
 
         public Builder host(String hcServer) {

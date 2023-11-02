@@ -8,11 +8,11 @@ import java.util.ArrayDeque;
 import java.util.Objects;
 import java.util.Properties;
 
-public final class EncryptPropertiesFileCommand implements Command {
+public final class DecryptPropertiesFileCommand implements Command {
     private final CliProperties properties;
 
 
-    private EncryptPropertiesFileCommand(Builder builder) {
+    private DecryptPropertiesFileCommand(Builder builder) {
         this.properties = builder.properties;
     }
 
@@ -36,12 +36,12 @@ public final class EncryptPropertiesFileCommand implements Command {
             originalProperties.load(fileInputStream);
             originalProperties.forEach((key, value) -> encryptedProperties.put(
                     key,
-                    vaultClient.encrypt(((String) value).getBytes())));
+                    new String(vaultClient.decrypt((String) value))
+            ));
 
             if (null == properties.getOutputFilePath()) {
                 encryptedProperties.store(System.out, "");
             }
-
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -59,9 +59,9 @@ public final class EncryptPropertiesFileCommand implements Command {
             return this;
         }
 
-        public EncryptPropertiesFileCommand build() {
+        public DecryptPropertiesFileCommand build() {
             validate();
-            return new EncryptPropertiesFileCommand(this);
+            return new DecryptPropertiesFileCommand(this);
         }
 
         private void validate() {

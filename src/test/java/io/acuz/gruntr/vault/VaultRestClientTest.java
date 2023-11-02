@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class VaultRestClientTest {
     @Test
     void test_ShouldNotFailOnCall() {
-        var client = VaultRestClient.builder().build();
+        var client = VaultTransitRestClient.builder().build();
         assertDoesNotThrow(() -> client.decrypt("vault:v1:BG0m4DWGwiGq7/G4FqGiTVrTYOz6qMtAXJ9a7ZZS/18i0/GjJIosu7bhJeTYky8ExbZPBTxgNuyas7Kv"));
 
         var result = client.decrypt("vault:v1:BG0m4DWGwiGq7/G4FqGiTVrTYOz6qMtAXJ9a7ZZS/18i0/GjJIosu7bhJeTYky8ExbZPBTxgNuyas7Kv");

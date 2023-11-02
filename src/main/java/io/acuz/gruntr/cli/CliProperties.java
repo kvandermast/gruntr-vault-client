@@ -11,11 +11,13 @@ public final class CliProperties {
     private final String hcToken;
     private final String hcServer;
     private final String hcTransitPath;
+    private final String hcTransitKeyName;
 
 
     private CliProperties(Builder builder) {
         this.hcServer = builder.hcServer;
         this.hcTransitPath = builder.hcTransitPath;
+        this.hcTransitKeyName = builder.hcTransitKeyName;
         this.inputFilePath = builder.inputFilePath;
         this.outputFilePath = builder.outputFilePath;
         this.hcToken = builder.hcToken;
@@ -23,6 +25,10 @@ public final class CliProperties {
 
     static Builder builder() {
         return new Builder();
+    }
+
+    static Builder builder(Builder builder) {
+        return new Builder(builder);
     }
 
     public Path getInputFilePath() {
@@ -45,6 +51,10 @@ public final class CliProperties {
         return hcTransitPath;
     }
 
+    public String getHcTransitKeyName() {
+        return hcTransitKeyName;
+    }
+
     static final class Builder {
 
         private ArrayDeque<String> params;
@@ -53,6 +63,21 @@ public final class CliProperties {
         private String hcToken;
         private String hcServer;
         private String hcTransitPath;
+        private String hcTransitKeyName;
+
+        Builder() {
+            //no-op
+        }
+
+        Builder(Builder builder) {
+            this.inputFilePath = builder.inputFilePath;
+            this.outputFilePath = builder.outputFilePath;
+            this.hcToken = builder.hcToken;
+            this.hcServer = builder.hcToken;
+            this.hcTransitPath = builder.hcTransitPath;
+            this.hcTransitKeyName = builder.hcTransitKeyName;
+            this.params = builder.params;
+        }
 
         CliProperties build() {
             preValidate();
@@ -79,6 +104,7 @@ public final class CliProperties {
             Objects.requireNonNull(this.hcToken);
             Objects.requireNonNull(this.hcServer);
             Objects.requireNonNull(this.hcTransitPath);
+            Objects.requireNonNull(this.hcTransitKeyName);
         }
 
         private void prepare() {
@@ -99,12 +125,68 @@ public final class CliProperties {
                     this.hcServer = this.params.remove();
                 } else if ("--hc-transit-path".equalsIgnoreCase(next)) {
                     this.hcTransitPath = this.params.remove();
+                } else if ("--hc-transit-key".equalsIgnoreCase(next)) {
+                    this.hcTransitKeyName = this.params.remove();
                 }
             }
         }
 
         public Builder parameters(ArrayDeque<String> params) {
             this.params = params;
+            return this;
+        }
+
+        public Path getInputFilePath() {
+            return inputFilePath;
+        }
+
+        public Builder inputFilePath(Path inputFilePath) {
+            this.inputFilePath = inputFilePath;
+            return this;
+        }
+
+        public Path getOutputFilePath() {
+            return outputFilePath;
+        }
+
+        public Builder outputFilePath(Path outputFilePath) {
+            this.outputFilePath = outputFilePath;
+            return this;
+        }
+
+        public String getHcToken() {
+            return hcToken;
+        }
+
+        public Builder hcToken(String hcToken) {
+            this.hcToken = hcToken;
+            return this;
+        }
+
+        public String getHcServer() {
+            return hcServer;
+        }
+
+        public Builder hcServer(String hcServer) {
+            this.hcServer = hcServer;
+            return this;
+        }
+
+        public String getHcTransitPath() {
+            return hcTransitPath;
+        }
+
+        public Builder hcTransitPath(String hcTransitPath) {
+            this.hcTransitPath = hcTransitPath;
+            return this;
+        }
+
+        public String getHcTransitKeyName() {
+            return hcTransitKeyName;
+        }
+
+        public Builder hcTransitKeyName(String hcTransitKeyName) {
+            this.hcTransitKeyName = hcTransitKeyName;
             return this;
         }
     }

@@ -1,6 +1,6 @@
 package io.acuz.gruntr;
 
-import io.acuz.gruntr.vault.VaultRestClient;
+import io.acuz.gruntr.vault.VaultTransitRestClient;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,7 +39,7 @@ public final class Client {
     }
 
     public Properties getDecryptedProperties() {
-        var vault = VaultRestClient.builder().build();
+        var vault = VaultTransitRestClient.builder().build();
         var masterKey = vault.decrypt(this.encryptedProperties.getProperty("sops_hc_vault__list_0__map_enc"));
         var properties = new Properties();
 
