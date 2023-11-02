@@ -90,3 +90,9 @@ class ClientTest {
     }
 }
 ```
+
+## Why 'Gruntr'
+
+To grunt can either stand for "make a low, short guttural sound", like a pig, or for someone that used to be unskilled in a certain profession (to grunt yourself up the ladder).
+I just liked the idea that in a DevOps environment wee remove the heavy lifting of "securing your sensitive information" away from the developers and into a tool that is made for it.
+Hashicorp Vault offers a large toolset of services, with the transit one being one of the most versatile ones around.
