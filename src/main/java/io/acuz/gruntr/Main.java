@@ -1,6 +1,6 @@
-package org.gruntr.sops.client;
+package io.acuz.gruntr;
 
-import org.gruntr.sops.client.cli.CommandFactory;
+import io.acuz.gruntr.cli.CommandFactory;
 
 public class Main {
     public static void main(String[] args) {

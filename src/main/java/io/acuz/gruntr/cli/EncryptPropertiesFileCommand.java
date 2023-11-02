@@ -1,6 +1,6 @@
-package org.gruntr.sops.client.cli;
+package io.acuz.gruntr.cli;
 
-import org.gruntr.sops.client.vault.VaultRestClient;
+import io.acuz.gruntr.vault.VaultRestClient;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,11 +35,9 @@ public final class EncryptPropertiesFileCommand implements Command {
 
             var encryptedProperties = new Properties();
 
-            originalProperties.entrySet().forEach(entry -> {
-                encryptedProperties.put(
-                        entry.getKey(),
-                        vaultClient.encrypt(((String) entry.getValue()).getBytes()));
-            });
+            originalProperties.forEach((key, value) -> encryptedProperties.put(
+                    key,
+                    vaultClient.encrypt(((String) value).getBytes())));
 
             if (null == properties.getOutputFilePath()) {
                 encryptedProperties.store(System.out, "");

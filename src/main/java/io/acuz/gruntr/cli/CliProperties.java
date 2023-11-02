@@ -1,4 +1,4 @@
-package org.gruntr.sops.client.cli;
+package io.acuz.gruntr.cli;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

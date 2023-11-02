@@ -1,4 +1,4 @@
-package org.gruntr.sops.client.vault;
+package io.acuz.gruntr.vault;
 
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package org.gruntr.sops.client.cli;
+package io.acuz.gruntr.cli;
 
 public interface Command {
     void run();

@@ -1,6 +1,6 @@
-package org.gruntr.sops.client;
+package io.acuz.gruntr;
 
-import org.gruntr.sops.client.vault.VaultRestClient;
+import io.acuz.gruntr.vault.VaultRestClient;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;

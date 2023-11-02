@@ -1,4 +1,4 @@
-package org.gruntr.sops.client.vault;
+package io.acuz.gruntr.vault;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;

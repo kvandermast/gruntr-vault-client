@@ -1,4 +1,4 @@
-package org.gruntr.sops.client;
+package io.acuz.gruntr;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,9 +26,7 @@ class ClientTest {
         var properties = client.getEncryptedProperties();
         assertEquals(2, properties.size());
 
-        properties.keySet().forEach(it -> {
-            assertFalse(((String) it).startsWith("sops_"), "Properties should not contains sops entries, found " + it);
-        });
+        properties.keySet().forEach(it -> assertFalse(((String) it).startsWith("sops_"), "Properties should not contains sops entries, found " + it));
     }
 
     @Test
