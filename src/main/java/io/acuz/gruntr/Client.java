@@ -73,7 +73,6 @@ public final class Client {
     }
 
     public Properties getEncryptedProperties() {
-        var properties = (Properties) this.encryptedProperties.clone();
 
 //        final var keys = properties.keySet();
 //
@@ -82,7 +81,7 @@ public final class Client {
 //                properties.remove(key);
 //        }
 
-        return properties;
+        return (Properties) this.encryptedProperties.clone();
     }
 
     public static final class Builder {
