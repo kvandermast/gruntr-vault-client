@@ -11,7 +11,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public final class VaultTransitRestClient {
+public final class VaultTransitRestClientImpl implements VaultTransitRestClient {
+    @SuppressWarnings("UastIncorrectHttpHeaderInspection")
     private static final String HEADER_X_VAULT_TOKEN = "X-Vault-Token";
     private static final String HEADER_ACCEPT = "Accept";
     private static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
@@ -23,7 +24,7 @@ public final class VaultTransitRestClient {
     private final String transitKeyName;
 
 
-    private VaultTransitRestClient(Builder builder) {
+    VaultTransitRestClientImpl(Builder builder) {
         this.host = builder.host;
         this.token = builder.token;
         this.transitPath = builder.transitPath;
@@ -34,6 +35,7 @@ public final class VaultTransitRestClient {
         return new Builder();
     }
 
+    @Override
     public String encrypt(byte[] unencryptedData) {
         var httpClient = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NEVER)
@@ -74,6 +76,7 @@ public final class VaultTransitRestClient {
 
     }
 
+    @Override
     public byte[] decrypt(String encryptedMasterKey) {
         var httpClient = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NEVER)
@@ -113,38 +116,5 @@ public final class VaultTransitRestClient {
         }
 
         throw new IllegalStateException("Unable to decrypt the requested value");
-    }
-
-    public static final class Builder {
-        private String host;
-        private String token;
-        private String transitPath;
-
-        private String transitKeyName;
-
-        public VaultTransitRestClient build() {
-            return new VaultTransitRestClient(this);
-        }
-
-        public Builder host(String hcServer) {
-            this.host = hcServer;
-            return this;
-        }
-
-        public Builder token(String hcToken) {
-            this.token = hcToken;
-            return this;
-        }
-
-        public Builder transitPath(String hcTransitPath) {
-            this.transitPath = hcTransitPath;
-            return this;
-        }
-
-        public Builder transitKeyName(String hcTransitKeyName) {
-            this.transitKeyName = hcTransitKeyName;
-
-            return this;
-        }
     }
 }

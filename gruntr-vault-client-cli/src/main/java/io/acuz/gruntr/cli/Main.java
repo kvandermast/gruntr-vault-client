@@ -1,6 +1,4 @@
-package io.acuz.gruntr;
-
-import io.acuz.gruntr.cli.CommandFactory;
+package io.acuz.gruntr.cli;
 
 public class Main {
     public static void main(String[] args) {

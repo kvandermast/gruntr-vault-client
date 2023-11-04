@@ -1,6 +1,6 @@
 package io.acuz.gruntr.cli;
 
-import io.acuz.gruntr.vault.VaultTransitRestClient;
+import io.acuz.gruntr.vault.VaultTransitRestClientImpl;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.util.ArrayDeque;
 import java.util.Objects;
 import java.util.Properties;
 
-public final class DecryptPropertiesFileCommand implements Command {
+final class DecryptPropertiesFileCommand implements Command {
     private final CliProperties properties;
 
 
@@ -37,7 +37,7 @@ public final class DecryptPropertiesFileCommand implements Command {
                 throw new IllegalStateException("Configuration mismatch");
             }
 
-            var vaultClient = VaultTransitRestClient.builder()
+            var vaultClient = VaultTransitRestClientImpl.builder()
                     .host(vaultHost)
                     .token(this.properties.getHcToken())
                     .transitPath(vaultTransitPath)

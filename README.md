@@ -5,8 +5,29 @@
 The idea behind the Gruntr Vault Client is based on the Mozilla SOPS file encryption, but with that difference that it solely relies on the Vault transit engine for
 
 - encryption of the property values
-- decryption of the property values
-- available as a CLI and a Client that you can use in Java web applications
+- decryption of the property values 
+- facilitator to encrypt and decrypt values on the fly
+
+It is available as a CLI and a Client that you can use in Java web applications
+
+## Building the dependencies
+
+The project uses gradle to build the artifacts:
+
+```shell
+$ ./gradlew clean jar
+
+BUILD SUCCESSFUL in 1s
+9 actionable tasks: 6 executed, 3 up-to-date
+
+$ find . -name "*gruntr*.jar"
+./gruntr-vault-client-api/build/libs/gruntr-vault-client-api-0.0.1-SNAPSHOT.jar
+./gruntr-vault-client-cli/build/libs/gruntr-vault-client-cli-0.0.1-SNAPSHOT.jar
+./gruntr-vault-client/build/libs/gruntr-vault-client-0.0.1-SNAPSHOT.jar
+
+
+
+```
 
 ## CLI
 
@@ -94,5 +115,5 @@ class ClientTest {
 ## Why 'Gruntr'
 
 To grunt can either stand for "make a low, short guttural sound", like a pig, or for someone that used to be unskilled in a certain profession (to grunt yourself up the ladder).
-I just liked the idea that in a DevOps environment wee remove the heavy lifting of "securing your sensitive information" away from the developers and into a tool that is made for it.
+I just liked the idea that in a DevOps environment we remove the heavy lifting of "securing your sensitive information" away from the developers and into a tool that is made for it.
 Hashicorp Vault offers a large toolset of services, with the transit one being one of the most versatile ones around.

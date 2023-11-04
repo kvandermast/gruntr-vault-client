@@ -3,7 +3,7 @@ package io.acuz.gruntr.cli;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 
-public final class CommandFactory {
+final class CommandFactory {
     public static Command build(String[] args) {
         var q = new ArrayDeque<>(Arrays.asList(args));
 

@@ -1,5 +1,6 @@
 package io.acuz.gruntr.vault;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Base64;
@@ -10,7 +11,7 @@ class VaultRestClientTest {
     @Test
     void test_ShouldNotFailOnCall() {
         var client = VaultTransitRestClient.builder().build();
-        assertDoesNotThrow(() -> client.decrypt("vault:v1:BG0m4DWGwiGq7/G4FqGiTVrTYOz6qMtAXJ9a7ZZS/18i0/GjJIosu7bhJeTYky8ExbZPBTxgNuyas7Kv"));
+        Assertions.assertDoesNotThrow(() -> client.decrypt("vault:v1:BG0m4DWGwiGq7/G4FqGiTVrTYOz6qMtAXJ9a7ZZS/18i0/GjJIosu7bhJeTYky8ExbZPBTxgNuyas7Kv"));
 
         var result = client.decrypt("vault:v1:BG0m4DWGwiGq7/G4FqGiTVrTYOz6qMtAXJ9a7ZZS/18i0/GjJIosu7bhJeTYky8ExbZPBTxgNuyas7Kv");
 

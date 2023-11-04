@@ -1,6 +1,6 @@
 package io.acuz.gruntr.cli;
 
-import io.acuz.gruntr.vault.VaultTransitRestClient;
+import io.acuz.gruntr.vault.VaultTransitRestClientImpl;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.util.ArrayDeque;
 import java.util.Objects;
 import java.util.Properties;
 
-public final class EncryptPropertiesFileCommand implements Command {
+final class EncryptPropertiesFileCommand implements Command {
     private final CliProperties properties;
 
 
@@ -24,7 +24,7 @@ public final class EncryptPropertiesFileCommand implements Command {
     @Override
     public void run() {
         try (var fileInputStream = new FileInputStream(this.properties.getInputFilePath().toFile())) {
-            var vaultClient = VaultTransitRestClient.builder()
+            var vaultClient = VaultTransitRestClientImpl.builder()
                     .host(this.properties.getHcServer())
                     .token(this.properties.getHcToken())
                     .transitPath(this.properties.getHcTransitPath())

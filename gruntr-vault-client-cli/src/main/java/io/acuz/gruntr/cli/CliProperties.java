@@ -5,7 +5,7 @@ import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.Objects;
 
-public final class CliProperties {
+final class CliProperties {
     private final Path inputFilePath;
     private final Path outputFilePath;
     private final String hcToken;
@@ -25,10 +25,6 @@ public final class CliProperties {
 
     static Builder builder() {
         return new Builder();
-    }
-
-    static Builder builder(Builder builder) {
-        return new Builder(builder);
     }
 
     public Path getInputFilePath() {
@@ -67,16 +63,6 @@ public final class CliProperties {
 
         Builder() {
             //no-op
-        }
-
-        Builder(Builder builder) {
-            this.inputFilePath = builder.inputFilePath;
-            this.outputFilePath = builder.outputFilePath;
-            this.hcToken = builder.hcToken;
-            this.hcServer = builder.hcToken;
-            this.hcTransitPath = builder.hcTransitPath;
-            this.hcTransitKeyName = builder.hcTransitKeyName;
-            this.params = builder.params;
         }
 
         CliProperties build() {
@@ -133,60 +119,6 @@ public final class CliProperties {
 
         public Builder parameters(ArrayDeque<String> params) {
             this.params = params;
-            return this;
-        }
-
-        public Path getInputFilePath() {
-            return inputFilePath;
-        }
-
-        public Builder inputFilePath(Path inputFilePath) {
-            this.inputFilePath = inputFilePath;
-            return this;
-        }
-
-        public Path getOutputFilePath() {
-            return outputFilePath;
-        }
-
-        public Builder outputFilePath(Path outputFilePath) {
-            this.outputFilePath = outputFilePath;
-            return this;
-        }
-
-        public String getHcToken() {
-            return hcToken;
-        }
-
-        public Builder hcToken(String hcToken) {
-            this.hcToken = hcToken;
-            return this;
-        }
-
-        public String getHcServer() {
-            return hcServer;
-        }
-
-        public Builder hcServer(String hcServer) {
-            this.hcServer = hcServer;
-            return this;
-        }
-
-        public String getHcTransitPath() {
-            return hcTransitPath;
-        }
-
-        public Builder hcTransitPath(String hcTransitPath) {
-            this.hcTransitPath = hcTransitPath;
-            return this;
-        }
-
-        public String getHcTransitKeyName() {
-            return hcTransitKeyName;
-        }
-
-        public Builder hcTransitKeyName(String hcTransitKeyName) {
-            this.hcTransitKeyName = hcTransitKeyName;
             return this;
         }
     }
