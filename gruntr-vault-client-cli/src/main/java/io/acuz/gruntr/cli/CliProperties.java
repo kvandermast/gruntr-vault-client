@@ -85,7 +85,7 @@ final class CliProperties {
         private void preValidate() {
             requireNonNull(params);
 
-            if (params.isEmpty() || params.size() < 2) {
+            if (params.isEmpty()) {
                 throw new IllegalStateException("Insufficient parameters provided");
             }
         }
@@ -93,34 +93,38 @@ final class CliProperties {
         private void postValidate() {
             this.params = null;
 
-            requireNonNull(this.inputFilePath);
-            requireNonNull(this.hcToken);
-            requireNonNull(this.hcServer);
-            requireNonNull(this.hcTransitPath);
-            requireNonNull(this.hcTransitKeyName);
+            requireNonNull(this.inputFilePath, "Missing inputPath");
+            requireNonNull(this.hcToken, "Missing Vault Token");
+            requireNonNull(this.hcServer, "Missing Vault Host/Server");
+            requireNonNull(this.hcTransitPath, "Missing mounted Vault Transit Path");
+            requireNonNull(this.hcTransitKeyName, "Missing Vault Transit Key");
         }
 
         private void prepare() {
             while (!this.params.isEmpty()) {
-                switch (CliParameterName.get(this.params.remove())) {
-                    case INPUT_FILE:
-                        this.inputFilePath = Paths.get(this.params.remove());
-                        break;
-                    case OUTPUT_FILE:
-                        this.outputFilePath = Paths.get(this.params.remove());
-                        break;
-                    case HC_VAULT_TOKEN:
-                        this.hcToken = this.params.remove();
-                        break;
-                    case HC_VAULT_HOST:
-                        this.hcServer = this.params.remove();
-                        break;
-                    case HC_VAULT_TRANSIT_PATH:
-                        this.hcTransitPath = this.params.remove();
-                        break;
-                    case HC_VAULT_TRANSIT_KEY:
-                        this.hcTransitKeyName = this.params.remove();
-                        break;
+                var name = CliParameterName.get(this.params.remove());
+
+                if (null != name) {
+                    switch (name) {
+                        case INPUT_FILE:
+                            this.inputFilePath = Paths.get(this.params.remove());
+                            break;
+                        case OUTPUT_FILE:
+                            this.outputFilePath = Paths.get(this.params.remove());
+                            break;
+                        case HC_VAULT_TOKEN:
+                            this.hcToken = this.params.remove();
+                            break;
+                        case HC_VAULT_HOST:
+                            this.hcServer = this.params.remove();
+                            break;
+                        case HC_VAULT_TRANSIT_PATH:
+                            this.hcTransitPath = this.params.remove();
+                            break;
+                        case HC_VAULT_TRANSIT_KEY:
+                            this.hcTransitKeyName = this.params.remove();
+                            break;
+                    }
                 }
             }
         }
