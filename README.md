@@ -24,12 +24,11 @@ $ find . -name "*gruntr*.jar"
 ./gruntr-vault-client-api/build/libs/gruntr-vault-client-api-0.0.1-SNAPSHOT.jar
 ./gruntr-vault-client-cli/build/libs/gruntr-vault-client-cli-0.0.1-SNAPSHOT.jar
 ./gruntr-vault-client/build/libs/gruntr-vault-client-0.0.1-SNAPSHOT.jar
-
-
-
 ```
 
 ## CLI
+
+The CLI is a "fat" or "uber"-jar that contains all the required dependencies, which can be run as a Java executable jar.
 
 ### Encryption
 
@@ -43,11 +42,13 @@ yet.another.secret=more secret even
 When running the main class you pass the following parameters:
 
 ```shell
-encrypt -i ./application.env \
-        --token TOKEN_YOUR_RECEIVED \
-        --hc-vault-server http://vault:8201 \    # point to your Vault Server
-        --hc-transit-path transit/project_name \ # this is the mounted transit engine
-        --hc-transit-key appkey                  # the key that you created
+java -jar ./gruntr-vault-client-cli.jar \ 
+        encrypt \                                  # use the "encrypt" command
+        -i ./application.env \                     # the "original" properties files
+        --token TOKEN_YOUR_RECEIVED \              # your vault token
+        --hc-vault-server http://vault:8201 \      # point to your Vault Server
+        --hc-transit-path transit/project_name \   # this is the mounted transit engine
+        --hc-transit-key appkey                    # the key that you created
 ```
 This generates an output to stdout, alike:
 
@@ -68,11 +69,13 @@ The file contains correctly encoded values for a properties file.
 Give the example above, you run the CLI with the following parameters:
 
 ```bash
-decrypt -i ./application-encrypted.properties \ 
-        --token TOKEN_YOUR_RECEIVED \
-        --hc-vault-server http://vault:8201 \    # point to your Vault Server
-        --hc-transit-path transit/project_name \ # this is the mounted transit engine
-        --hc-transit-key appkey                  # the key that you created
+java -jar ./gruntr-vault-client-cli.jar \ 
+        decrypt \                                 # use the "decrypt" command 
+        -i ./application-encrypted.properties \   # the encrypted properties file
+        --token TOKEN_YOUR_RECEIVED \             # your vault token
+        --hc-vault-server http://vault:8201 \     # point to your Vault Server
+        --hc-transit-path transit/project_name \  # this is the mounted transit engine
+        --hc-transit-key appkey                   # the key that you created
 ```
 
 This will decrypt the file against the defined Transit engine to

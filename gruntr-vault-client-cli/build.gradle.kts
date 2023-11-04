@@ -15,6 +15,19 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
 }
 
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "io.acuz.gruntr.cli.Main"
+    }
+
+    val dependencies = configurations
+        .runtimeClasspath
+        .get()
+        .map(::zipTree) // OR .map { zipTree(it) }
+    from(dependencies)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 tasks.test {
     useJUnitPlatform()
 }
