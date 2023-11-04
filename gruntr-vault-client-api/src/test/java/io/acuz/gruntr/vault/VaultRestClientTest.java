@@ -7,6 +7,7 @@ import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("SpellCheckingInspection")
 class VaultRestClientTest {
     @Test
     void test_ShouldNotFailOnCall() {
