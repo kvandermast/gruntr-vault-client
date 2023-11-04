@@ -3,7 +3,8 @@ package io.acuz.gruntr.cli;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
-import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
 
 final class CliProperties {
     private final Path inputFilePath;
@@ -51,6 +52,7 @@ final class CliProperties {
         return hcTransitKeyName;
     }
 
+
     static final class Builder {
 
         private ArrayDeque<String> params;
@@ -65,6 +67,11 @@ final class CliProperties {
             //no-op
         }
 
+        public Builder parameters(ArrayDeque<String> params) {
+            this.params = params;
+            return this;
+        }
+
         CliProperties build() {
             preValidate();
 
@@ -76,7 +83,7 @@ final class CliProperties {
         }
 
         private void preValidate() {
-            Objects.requireNonNull(params);
+            requireNonNull(params);
 
             if (params.isEmpty() || params.size() < 2) {
                 throw new IllegalStateException("Insufficient parameters provided");
@@ -86,40 +93,36 @@ final class CliProperties {
         private void postValidate() {
             this.params = null;
 
-            Objects.requireNonNull(this.inputFilePath);
-            Objects.requireNonNull(this.hcToken);
-            Objects.requireNonNull(this.hcServer);
-            Objects.requireNonNull(this.hcTransitPath);
-            Objects.requireNonNull(this.hcTransitKeyName);
+            requireNonNull(this.inputFilePath);
+            requireNonNull(this.hcToken);
+            requireNonNull(this.hcServer);
+            requireNonNull(this.hcTransitPath);
+            requireNonNull(this.hcTransitKeyName);
         }
 
         private void prepare() {
             while (!this.params.isEmpty()) {
-                var next = this.params.remove();
-
-                if ("--input".equalsIgnoreCase(next) || "-i".equalsIgnoreCase(next)) {
-                    var path = this.params.remove();
-
-                    this.inputFilePath = Paths.get(path);
-                } else if ("--output".equalsIgnoreCase(next) || "-o".equalsIgnoreCase(next)) {
-                    var path = this.params.remove();
-
-                    this.outputFilePath = Paths.get(path);
-                } else if ("--hc-token".equalsIgnoreCase(next) || "--token".equalsIgnoreCase(next) || "-t".equalsIgnoreCase(next)) {
-                    this.hcToken = this.params.remove();
-                } else if ("--hc-vault-server".equalsIgnoreCase(next)) {
-                    this.hcServer = this.params.remove();
-                } else if ("--hc-transit-path".equalsIgnoreCase(next)) {
-                    this.hcTransitPath = this.params.remove();
-                } else if ("--hc-transit-key".equalsIgnoreCase(next)) {
-                    this.hcTransitKeyName = this.params.remove();
+                switch (CliParameterName.get(this.params.remove())) {
+                    case INPUT_FILE:
+                        this.inputFilePath = Paths.get(this.params.remove());
+                        break;
+                    case OUTPUT_FILE:
+                        this.outputFilePath = Paths.get(this.params.remove());
+                        break;
+                    case HC_VAULT_TOKEN:
+                        this.hcToken = this.params.remove();
+                        break;
+                    case HC_VAULT_HOST:
+                        this.hcServer = this.params.remove();
+                        break;
+                    case HC_VAULT_TRANSIT_PATH:
+                        this.hcTransitPath = this.params.remove();
+                        break;
+                    case HC_VAULT_TRANSIT_KEY:
+                        this.hcTransitKeyName = this.params.remove();
+                        break;
                 }
             }
-        }
-
-        public Builder parameters(ArrayDeque<String> params) {
-            this.params = params;
-            return this;
         }
     }
 }
