@@ -16,7 +16,7 @@ public interface VaultTransitRestClient {
 
         String transitKeyName;
 
-        public VaultTransitRestClientImpl build() {
+        public VaultTransitRestClient build() {
             return new VaultTransitRestClientImpl(this);
         }
 

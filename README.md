@@ -86,7 +86,7 @@ my.secret=something very secret
 
 ## Using the client
 
-You can also use the Gruntr library in a web application, eg
+You can also use the Gruntr library in a web application, e.g.
 
 ```java
 package io.acuz.gruntr;

@@ -73,14 +73,6 @@ public final class Client {
     }
 
     public Properties getEncryptedProperties() {
-
-//        final var keys = properties.keySet();
-//
-//        for (Object key : keys) {
-//            if (key instanceof String && ((String) key).startsWith("gruntr__"))
-//                properties.remove(key);
-//        }
-
         return (Properties) this.encryptedProperties.clone();
     }
 

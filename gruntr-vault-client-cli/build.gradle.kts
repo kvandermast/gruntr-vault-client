@@ -12,7 +12,7 @@ dependencies {
     implementation(project(":gruntr-vault-client-api"))
 
     testImplementation(platform("org.junit:junit-bom:${junitVersion}"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
 }
 
 tasks.test {

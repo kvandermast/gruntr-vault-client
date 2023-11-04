@@ -31,10 +31,6 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
         this.transitKeyName = builder.transitKeyName;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     @Override
     public String encrypt(byte[] unencryptedData) {
         var httpClient = HttpClient.newBuilder()
