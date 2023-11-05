@@ -16,7 +16,8 @@ class ClientTest {
     @Test
     void test_createANewClientWithParameters() {
         var client = Client.builder()
-                .setPath(Path.of("/Users/Kris/Documents/fod_workspace/sops_playground", "application-encrypted.properties"))
+                .setToken("root".getBytes())
+                .setPath(Path.of("/Users/Kris/fod_workspace/sops_playground", "application-encrypted.properties"))
                 .build();
 
         assertNotNull(client);
@@ -32,7 +33,8 @@ class ClientTest {
     @Test
     void test_createANewClientAndDecrypt() {
         var client = Client.builder()
-                .setPath(Path.of("/Users/Kris/Documents/fod_workspace/sops_playground", "application-encrypted.properties"))
+                .setToken("root".getBytes())
+                .setPath(Path.of("/Users/Kris/fod_workspace/sops_playground", "application-encrypted.properties"))
                 .build();
 
         assertNotNull(client);

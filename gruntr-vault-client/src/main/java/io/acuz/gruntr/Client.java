@@ -11,10 +11,13 @@ import java.util.Properties;
 public final class Client {
     private final Path path;
 
+    private final byte[] token;
+
     private final Properties encryptedProperties;
 
     public Client(Builder builder) {
         this.path = builder.path;
+        this.token = builder.token;
         this.encryptedProperties = readEncryptedProperties(this.path);
     }
 
@@ -47,7 +50,7 @@ public final class Client {
 
         var vault = VaultTransitRestClient.builder()
                 .host(vaultHost)
-                .token("root")
+                .token(new String(token))
                 .transitPath(vaultTransitPath)
                 .transitKeyName(vaultTransitKey)
                 .build();
@@ -79,8 +82,19 @@ public final class Client {
     public static final class Builder {
         private Path path;
 
+        private byte[] token;
+
         public Builder setPath(Path path) {
             this.path = path;
+
+            return this;
+        }
+
+
+        public Builder setToken(byte[] token) {
+            this.token = new byte[token.length];
+
+            System.arraycopy(token, 0, this.token, 0, token.length);
 
             return this;
         }
