@@ -11,7 +11,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class VaultRestClientTest {
     @Test
     void test_ShouldNotFailOnCall() {
-        var client = VaultTransitRestClient.builder().build();
+        var client = VaultTransitRestClient
+                .builder()
+                .host("http://vault:8201")
+                .transitPath("transit/project_name")
+                .transitKeyName("appkey")
+                .token("root".toCharArray())
+                .build();
         Assertions.assertDoesNotThrow(() -> client.decrypt("vault:v1:BG0m4DWGwiGq7/G4FqGiTVrTYOz6qMtAXJ9a7ZZS/18i0/GjJIosu7bhJeTYky8ExbZPBTxgNuyas7Kv"));
 
         var result = client.decrypt("vault:v1:BG0m4DWGwiGq7/G4FqGiTVrTYOz6qMtAXJ9a7ZZS/18i0/GjJIosu7bhJeTYky8ExbZPBTxgNuyas7Kv");

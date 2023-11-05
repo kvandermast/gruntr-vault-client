@@ -1,5 +1,7 @@
 package io.acuz.gruntr.vault;
 
+import java.util.Objects;
+
 public interface VaultTransitRestClient {
     static VaultTransitRestClientImpl.Builder builder() {
         return new Builder();
@@ -17,7 +19,15 @@ public interface VaultTransitRestClient {
         String transitKeyName;
 
         public VaultTransitRestClient build() {
+            validate();
             return new VaultTransitRestClientImpl(this);
+        }
+
+        private void validate() {
+            Objects.requireNonNull(host, "Vault host should not be null");
+            Objects.requireNonNull(token, "Vault token should not be null");
+            Objects.requireNonNull(transitPath, "Vault transit path should not be null");
+            Objects.requireNonNull(transitKeyName, "Vault transit key name should not be null");
         }
 
         public VaultTransitRestClientImpl.Builder host(String hcServer) {
