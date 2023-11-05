@@ -16,7 +16,7 @@ class ClientTest {
     @Test
     void test_createANewClientWithParameters() {
         var client = Client.builder()
-                .setToken("root".getBytes())
+                .setToken("root".toCharArray())
                 .setPath(Path.of("/Users/Kris/fod_workspace/sops_playground", "application-encrypted.properties"))
                 .build();
 
@@ -33,7 +33,7 @@ class ClientTest {
     @Test
     void test_createANewClientAndDecrypt() {
         var client = Client.builder()
-                .setToken("root".getBytes())
+                .setToken("root".toCharArray())
                 .setPath(Path.of("/Users/Kris/fod_workspace/sops_playground", "application-encrypted.properties"))
                 .build();
 

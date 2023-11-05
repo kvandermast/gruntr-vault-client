@@ -9,6 +9,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Base64;
 
 public final class VaultTransitRestClientImpl implements VaultTransitRestClient {
@@ -19,16 +20,20 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
     private final ObjectMapper mapper = new ObjectMapper();
     private final JsonFactory factory = mapper.getFactory();
     private final String host;
-    private final String token;
+    private final char[] token;
     private final String transitPath;
     private final String transitKeyName;
 
 
     VaultTransitRestClientImpl(Builder builder) {
         this.host = builder.host;
-        this.token = builder.token;
+        this.token = new char[builder.token.length];
+        System.arraycopy(builder.token, 0, this.token, 0, this.token.length);
+
         this.transitPath = builder.transitPath;
         this.transitKeyName = builder.transitKeyName;
+
+        Arrays.fill(builder.token, '\0');
     }
 
     @Override
@@ -42,7 +47,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
 
         var request = HttpRequest.newBuilder()
                 .uri(VaultTransitEndpoint.ENCRYPT.uri(this.host, this.transitPath, transitKeyName))
-                .header(HEADER_X_VAULT_TOKEN, this.token)
+                .header(HEADER_X_VAULT_TOKEN, String.copyValueOf(this.token))
                 .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .build();
@@ -83,7 +88,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
 
         var request = HttpRequest.newBuilder()
                 .uri(VaultTransitEndpoint.DECRYPT.uri(this.host, this.transitPath, transitKeyName))
-                .header(HEADER_X_VAULT_TOKEN, this.token)
+                .header(HEADER_X_VAULT_TOKEN, String.copyValueOf(this.token))
                 .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .build();

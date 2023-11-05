@@ -9,7 +9,7 @@ import static java.util.Objects.requireNonNull;
 final class CliProperties {
     private final Path inputFilePath;
     private final Path outputFilePath;
-    private final String hcToken;
+    private final char[] hcToken;
     private final String hcServer;
     private final String hcTransitPath;
     private final String hcTransitKeyName;
@@ -36,7 +36,7 @@ final class CliProperties {
         return outputFilePath;
     }
 
-    public String getHcToken() {
+    public char[] getHcToken() {
         return hcToken;
     }
 
@@ -58,7 +58,7 @@ final class CliProperties {
         private ArrayDeque<String> params;
         private Path inputFilePath;
         private Path outputFilePath;
-        private String hcToken;
+        private char[] hcToken;
         private String hcServer;
         private String hcTransitPath;
         private String hcTransitKeyName;
@@ -113,7 +113,10 @@ final class CliProperties {
                             this.outputFilePath = Paths.get(this.params.remove());
                             break;
                         case HC_VAULT_TOKEN:
-                            this.hcToken = this.params.remove();
+                            var param = this.params.remove();
+                            this.hcToken = new char[param.length()];
+                            System.arraycopy(param.toCharArray(), 0, this.hcToken, 0, this.hcToken.length);
+
                             break;
                         case HC_VAULT_HOST:
                             this.hcServer = this.params.remove();

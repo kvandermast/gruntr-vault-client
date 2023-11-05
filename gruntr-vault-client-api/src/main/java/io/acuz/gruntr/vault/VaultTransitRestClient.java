@@ -11,7 +11,7 @@ public interface VaultTransitRestClient {
 
     final class Builder {
         String host;
-        String token;
+        char[] token;
         String transitPath;
 
         String transitKeyName;
@@ -25,8 +25,10 @@ public interface VaultTransitRestClient {
             return this;
         }
 
-        public VaultTransitRestClientImpl.Builder token(String hcToken) {
-            this.token = hcToken;
+        public VaultTransitRestClientImpl.Builder token(char[] hcToken) {
+            this.token = new char[hcToken.length];
+            System.arraycopy(hcToken, 0, this.token, 0, hcToken.length);
+
             return this;
         }
 

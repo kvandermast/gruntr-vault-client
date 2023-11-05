@@ -5,20 +5,25 @@ import io.acuz.gruntr.vault.VaultTransitRestClient;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
 
 public final class Client {
     private final Path path;
 
-    private final byte[] token;
+    private final char[] token;
 
     private final Properties encryptedProperties;
 
     public Client(Builder builder) {
         this.path = builder.path;
-        this.token = builder.token;
+        this.token = new char[builder.token.length];
+        System.arraycopy(builder.token, 0, this.token, 0, this.token.length);
+
         this.encryptedProperties = readEncryptedProperties(this.path);
+
+        Arrays.fill(builder.token, '\0');
     }
 
     public static Builder builder() {
@@ -50,7 +55,7 @@ public final class Client {
 
         var vault = VaultTransitRestClient.builder()
                 .host(vaultHost)
-                .token(new String(token))
+                .token(token)
                 .transitPath(vaultTransitPath)
                 .transitKeyName(vaultTransitKey)
                 .build();
@@ -82,7 +87,7 @@ public final class Client {
     public static final class Builder {
         private Path path;
 
-        private byte[] token;
+        private char[] token;
 
         public Builder setPath(Path path) {
             this.path = path;
@@ -90,9 +95,8 @@ public final class Client {
             return this;
         }
 
-
-        public Builder setToken(byte[] token) {
-            this.token = new byte[token.length];
+        public Builder setToken(char[] token) {
+            this.token = new char[token.length];
 
             System.arraycopy(token, 0, this.token, 0, token.length);
 
