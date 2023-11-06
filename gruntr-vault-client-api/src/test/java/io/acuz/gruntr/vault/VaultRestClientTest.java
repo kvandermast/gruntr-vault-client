@@ -1,5 +1,6 @@
 package io.acuz.gruntr.vault;
 
+import io.acuz.gruntr.vault.model.VaultToken;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ class VaultRestClientTest {
                 .host("http://vault:8201")
                 .transitPath("transit/project_name")
                 .transitKeyName("appkey")
-                .token("root".toCharArray())
+                .token(VaultToken.of("root"))
                 .build();
         Assertions.assertDoesNotThrow(() -> client.decrypt("vault:v1:BG0m4DWGwiGq7/G4FqGiTVrTYOz6qMtAXJ9a7ZZS/18i0/GjJIosu7bhJeTYky8ExbZPBTxgNuyas7Kv"));
 

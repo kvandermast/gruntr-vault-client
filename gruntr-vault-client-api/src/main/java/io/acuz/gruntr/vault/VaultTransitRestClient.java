@@ -1,5 +1,7 @@
 package io.acuz.gruntr.vault;
 
+import io.acuz.gruntr.vault.model.VaultToken;
+
 import java.util.Objects;
 
 public interface VaultTransitRestClient {
@@ -15,7 +17,7 @@ public interface VaultTransitRestClient {
 
     final class Builder {
         String host;
-        char[] token;
+        VaultToken token;
         String transitPath;
 
         String transitKeyName;
@@ -37,10 +39,8 @@ public interface VaultTransitRestClient {
             return this;
         }
 
-        public VaultTransitRestClientImpl.Builder token(char[] hcToken) {
-            this.token = new char[hcToken.length];
-            System.arraycopy(hcToken, 0, this.token, 0, hcToken.length);
-
+        public VaultTransitRestClientImpl.Builder token(VaultToken hcToken) {
+            this.token = hcToken;
             return this;
         }
 

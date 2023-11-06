@@ -49,7 +49,7 @@ class CliPropertiesTest {
         assertNotNull(props);
 
         assertEquals("http://vault:8201", props.getHcServer());
-        assertArrayEquals("token".toCharArray(), props.getHcToken());
+        assertArrayEquals("token".toCharArray(), props.getHcToken().getToken());
         assertEquals("appkey", props.getHcTransitKeyName());
         assertEquals("transit/project_name", props.getHcTransitPath());
         assertEquals(Path.of("/tmp/application-encrypted.properties"), props.getInputFilePath());

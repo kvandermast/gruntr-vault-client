@@ -1,29 +1,28 @@
 package io.acuz.gruntr;
 
 import io.acuz.gruntr.vault.VaultTransitRestClient;
+import io.acuz.gruntr.vault.model.VaultToken;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
 
 public final class Client {
     private final Path path;
 
-    private final char[] token;
+    private final VaultToken token;
 
     private final Properties encryptedProperties;
 
     public Client(Builder builder) {
         this.path = builder.path;
-        this.token = new char[builder.token.length];
-        System.arraycopy(builder.token, 0, this.token, 0, this.token.length);
+        this.token = builder.token.copyOf();
 
         this.encryptedProperties = readEncryptedProperties(this.path);
 
-        Arrays.fill(builder.token, '\0');
+        builder.token.invalidate();
     }
 
     public static Builder builder() {
@@ -87,7 +86,7 @@ public final class Client {
     public static final class Builder {
         private Path path;
 
-        private char[] token;
+        private VaultToken token;
 
         public Builder setPath(Path path) {
             this.path = path;
@@ -95,10 +94,8 @@ public final class Client {
             return this;
         }
 
-        public Builder setToken(char[] token) {
-            this.token = new char[token.length];
-
-            System.arraycopy(token, 0, this.token, 0, token.length);
+        public Builder setToken(VaultToken token) {
+            this.token = token.copyOf();
 
             return this;
         }

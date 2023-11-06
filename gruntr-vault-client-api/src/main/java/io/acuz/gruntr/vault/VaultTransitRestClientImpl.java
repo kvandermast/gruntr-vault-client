@@ -3,13 +3,13 @@ package io.acuz.gruntr.vault;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.acuz.gruntr.vault.model.VaultToken;
 
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Base64;
 
 public final class VaultTransitRestClientImpl implements VaultTransitRestClient {
@@ -20,20 +20,19 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
     private final ObjectMapper mapper = new ObjectMapper();
     private final JsonFactory factory = mapper.getFactory();
     private final String host;
-    private final char[] token;
+    private final VaultToken token;
     private final String transitPath;
     private final String transitKeyName;
 
 
     VaultTransitRestClientImpl(Builder builder) {
         this.host = builder.host;
-        this.token = new char[builder.token.length];
-        System.arraycopy(builder.token, 0, this.token, 0, this.token.length);
+        this.token = builder.token.copyOf();
 
         this.transitPath = builder.transitPath;
         this.transitKeyName = builder.transitKeyName;
 
-        Arrays.fill(builder.token, '\0');
+        builder.token.invalidate();
     }
 
     @Override
@@ -47,7 +46,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
 
         var request = HttpRequest.newBuilder()
                 .uri(VaultTransitEndpoint.ENCRYPT.uri(this.host, this.transitPath, transitKeyName))
-                .header(HEADER_X_VAULT_TOKEN, String.copyValueOf(this.token))
+                .header(HEADER_X_VAULT_TOKEN, this.token.stringValue())
                 .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .build();
@@ -88,7 +87,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
 
         var request = HttpRequest.newBuilder()
                 .uri(VaultTransitEndpoint.DECRYPT.uri(this.host, this.transitPath, transitKeyName))
-                .header(HEADER_X_VAULT_TOKEN, String.copyValueOf(this.token))
+                .header(HEADER_X_VAULT_TOKEN, this.token.stringValue())
                 .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .build();
@@ -118,6 +117,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
 
         throw new IllegalStateException("Unable to decrypt the requested value");
     }
+
     @Override
     public char[] rewrap(char[] originalToken) {
         var httpClient = HttpClient.newBuilder()
@@ -129,7 +129,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
 
         var request = HttpRequest.newBuilder()
                 .uri(VaultTransitEndpoint.REWRAP.uri(this.host, this.transitPath, transitKeyName))
-                .header(HEADER_X_VAULT_TOKEN, String.copyValueOf(this.token))
+                .header(HEADER_X_VAULT_TOKEN, this.token.stringValue())
                 .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .build();

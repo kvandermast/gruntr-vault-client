@@ -1,5 +1,7 @@
 package io.acuz.gruntr.cli;
 
+import io.acuz.gruntr.vault.model.VaultToken;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
@@ -9,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 final class CliProperties {
     private final Path inputFilePath;
     private final Path outputFilePath;
-    private final char[] hcToken;
+    private final VaultToken hcToken;
     private final String hcServer;
     private final String hcTransitPath;
     private final String hcTransitKeyName;
@@ -36,7 +38,7 @@ final class CliProperties {
         return outputFilePath;
     }
 
-    public char[] getHcToken() {
+    public VaultToken getHcToken() {
         return hcToken;
     }
 
@@ -58,7 +60,7 @@ final class CliProperties {
         private ArrayDeque<String> params;
         private Path inputFilePath;
         private Path outputFilePath;
-        private char[] hcToken;
+        private VaultToken hcToken;
         private String hcServer;
         private String hcTransitPath;
         private String hcTransitKeyName;
@@ -113,9 +115,7 @@ final class CliProperties {
                             this.outputFilePath = Paths.get(this.params.remove());
                             break;
                         case HC_VAULT_TOKEN:
-                            var param = this.params.remove();
-                            this.hcToken = new char[param.length()];
-                            System.arraycopy(param.toCharArray(), 0, this.hcToken, 0, this.hcToken.length);
+                            this.hcToken = VaultToken.of(this.params.remove());
 
                             break;
                         case HC_VAULT_HOST:

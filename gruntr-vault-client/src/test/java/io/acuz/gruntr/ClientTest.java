@@ -1,5 +1,6 @@
 package io.acuz.gruntr;
 
+import io.acuz.gruntr.vault.model.VaultToken;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -16,7 +17,7 @@ class ClientTest {
     @Test
     void test_createANewClientWithParameters() {
         var client = Client.builder()
-                .setToken("root".toCharArray())
+                .setToken(VaultToken.of("root"))
                 .setPath(Path.of("/Users/Kris/fod_workspace/sops_playground", "application-encrypted.properties"))
                 .build();
 
@@ -25,7 +26,7 @@ class ClientTest {
         assertNotNull(client.getEncryptedProperties());
 
         var properties = client.getEncryptedProperties();
-        assertEquals(5, properties.size());
+        assertEquals(6, properties.size());
 
         properties.keySet().forEach(it -> assertFalse(((String) it).startsWith("sops_"), "Properties should not contains sops entries, found " + it));
     }
@@ -33,13 +34,13 @@ class ClientTest {
     @Test
     void test_createANewClientAndDecrypt() {
         var client = Client.builder()
-                .setToken("root".toCharArray())
+                .setToken(VaultToken.of("root"))
                 .setPath(Path.of("/Users/Kris/fod_workspace/sops_playground", "application-encrypted.properties"))
                 .build();
 
         assertNotNull(client);
 
         var properties = client.getDecryptedProperties();
-        assertEquals(2, properties.size());
+        assertEquals(3, properties.size());
     }
 }
