@@ -159,14 +159,4 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
 
         throw new IllegalStateException("Unable to decrypt the requested value");
     }
-
-    private char[] toCharArray(byte[] bytes) {
-        var chars = new char[bytes.length];
-
-        for (int i = 0; i < bytes.length; i++) {
-            chars[i] = (char) bytes[i];
-        }
-
-        return chars;
-    }
 }
