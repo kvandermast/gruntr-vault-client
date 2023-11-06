@@ -35,13 +35,19 @@ final class RewrapPropertiesFileCommand implements Command {
             var encryptedProperties = new Properties();
 
             originalProperties.load(fileInputStream);
-            originalProperties.forEach((key, value) -> encryptedProperties.put(
-                    key,
-                    vaultClient.rewrap(((String) value).toCharArray())));
 
-            encryptedProperties.put("gruntr__vault_host", this.properties.getHcServer());
-            encryptedProperties.put("gruntr__vault_transit_path", this.properties.getHcTransitPath());
-            encryptedProperties.put("gruntr__vault_transit_key", this.properties.getHcTransitKeyName());
+
+            originalProperties.forEach((key, value) -> {
+                var kn = (String) key;
+
+                if (!kn.toLowerCase().startsWith("gruntr__")) {
+
+                    encryptedProperties.put(
+                            key,
+                            String.copyValueOf(vaultClient.rewrap(((String) value).toCharArray())));
+                }
+            });
+
 
             if (null == properties.getOutputFilePath()) {
                 encryptedProperties.store(System.out, "");
