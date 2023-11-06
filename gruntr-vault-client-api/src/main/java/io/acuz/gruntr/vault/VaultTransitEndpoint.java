@@ -1,6 +1,7 @@
 package io.acuz.gruntr.vault;
 
 import java.net.URI;
+import java.net.URL;
 
 enum VaultTransitEndpoint {
     ENCRYPT("encrypt"),
@@ -13,10 +14,10 @@ enum VaultTransitEndpoint {
         this.action = action;
     }
 
-    public URI uri(String host, String mountPath, String keyName) {
+    public URI from(URL host, String mountPath, String keyName) {
         return URI.create(
                 String.format("%s/v1/%s/%s/%s",
-                        host,
+                        host.toExternalForm(),
                         mountPath,
                         action,
                         keyName

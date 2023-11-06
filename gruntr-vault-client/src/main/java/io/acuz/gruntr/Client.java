@@ -5,6 +5,8 @@ import io.acuz.gruntr.vault.model.VaultToken;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Properties;
@@ -52,12 +54,17 @@ public final class Client {
         String vaultTransitPath = originalProperties.getProperty("gruntr__vault_transit_path");
 
 
-        var vault = VaultTransitRestClient.builder()
-                .host(vaultHost)
-                .token(token)
-                .transitPath(vaultTransitPath)
-                .transitKeyName(vaultTransitKey)
-                .build();
+        VaultTransitRestClient vault;
+        try {
+            vault = VaultTransitRestClient.builder()
+                    .host(URI.create(vaultHost).toURL())
+                    .token(token)
+                    .transitPath(vaultTransitPath)
+                    .transitKeyName(vaultTransitKey)
+                    .build();
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
 
         var properties = new Properties();
 

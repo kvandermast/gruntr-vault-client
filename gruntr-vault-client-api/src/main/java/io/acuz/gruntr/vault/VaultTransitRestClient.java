@@ -2,6 +2,7 @@ package io.acuz.gruntr.vault;
 
 import io.acuz.gruntr.vault.model.VaultToken;
 
+import java.net.URL;
 import java.util.Objects;
 
 public interface VaultTransitRestClient {
@@ -16,7 +17,7 @@ public interface VaultTransitRestClient {
     char[] rewrap(char[] originalToken);
 
     final class Builder {
-        String host;
+        URL host;
         VaultToken token;
         String transitPath;
 
@@ -34,7 +35,7 @@ public interface VaultTransitRestClient {
             Objects.requireNonNull(transitKeyName, "Vault transit key name should not be null");
         }
 
-        public VaultTransitRestClientImpl.Builder host(String hcServer) {
+        public VaultTransitRestClientImpl.Builder host(URL hcServer) {
             this.host = hcServer;
             return this;
         }

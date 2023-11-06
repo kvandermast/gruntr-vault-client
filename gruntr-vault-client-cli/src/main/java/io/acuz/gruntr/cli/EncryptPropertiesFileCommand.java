@@ -39,7 +39,7 @@ final class EncryptPropertiesFileCommand implements Command {
                     key,
                     vaultClient.encrypt(((String) value).getBytes())));
 
-            encryptedProperties.put("gruntr__vault_host", this.properties.getHcServer());
+            encryptedProperties.put("gruntr__vault_host", this.properties.getHcServer().toExternalForm());
             encryptedProperties.put("gruntr__vault_transit_path", this.properties.getHcTransitPath());
             encryptedProperties.put("gruntr__vault_transit_key", this.properties.getHcTransitKeyName());
 
@@ -53,7 +53,6 @@ final class EncryptPropertiesFileCommand implements Command {
     }
 
     static final class Builder {
-
         private CliProperties properties;
 
         public Builder parameters(ArrayDeque<String> params) {
@@ -71,6 +70,11 @@ final class EncryptPropertiesFileCommand implements Command {
 
         private void validate() {
             Objects.requireNonNull(properties);
+            Objects.requireNonNull(properties.getHcServer());
+            Objects.requireNonNull(properties.getHcToken());
+            Objects.requireNonNull(properties.getHcTransitPath());
+            Objects.requireNonNull(properties.getHcTransitKeyName());
+            Objects.requireNonNull(properties.getInputFilePath());
         }
     }
 }

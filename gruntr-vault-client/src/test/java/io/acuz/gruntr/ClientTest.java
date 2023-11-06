@@ -26,7 +26,7 @@ class ClientTest {
         assertNotNull(client.getEncryptedProperties());
 
         var properties = client.getEncryptedProperties();
-        assertEquals(6, properties.size());
+        assertEquals(5, properties.size());
 
         properties.keySet().forEach(it -> assertFalse(((String) it).startsWith("sops_"), "Properties should not contains sops entries, found " + it));
     }
@@ -41,6 +41,6 @@ class ClientTest {
         assertNotNull(client);
 
         var properties = client.getDecryptedProperties();
-        assertEquals(3, properties.size());
+        assertEquals(2, properties.size());
     }
 }

@@ -4,25 +4,29 @@ import io.acuz.gruntr.vault.model.VaultToken;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.Base64;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 @SuppressWarnings("SpellCheckingInspection")
 class VaultRestClientTest {
     @Test
-    void test_ShouldNotFailOnCall() {
+    void test_ShouldNotFailOnCall() throws MalformedURLException {
+        var url = URI.create("http://vault:8201").toURL();
+
         var client = VaultTransitRestClient
                 .builder()
-                .host("http://vault:8201")
+                .host(url)
                 .transitPath("transit/project_name")
                 .transitKeyName("appkey")
                 .token(VaultToken.of("root"))
                 .build();
-        Assertions.assertDoesNotThrow(() -> client.decrypt("vault:v1:BG0m4DWGwiGq7/G4FqGiTVrTYOz6qMtAXJ9a7ZZS/18i0/GjJIosu7bhJeTYky8ExbZPBTxgNuyas7Kv"));
+        Assertions.assertDoesNotThrow(() -> client.decrypt("vault:v1:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ=="));
 
-        var result = client.decrypt("vault:v1:BG0m4DWGwiGq7/G4FqGiTVrTYOz6qMtAXJ9a7ZZS/18i0/GjJIosu7bhJeTYky8ExbZPBTxgNuyas7Kv");
+        var result = client.decrypt("vault:v1:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==");
 
-        assertArrayEquals(Base64.getDecoder().decode("HRuB7Y1/9jpbk1lR2m579U571Z97GuDXrerbGA3c+Ao="), result);
+        assertArrayEquals(Base64.getDecoder().decode("c29tZXRoaW5nIHZlcnkgc2VjcmV0"), result);
     }
 }

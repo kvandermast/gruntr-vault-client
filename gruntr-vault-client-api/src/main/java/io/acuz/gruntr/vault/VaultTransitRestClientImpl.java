@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.acuz.gruntr.vault.model.VaultToken;
 
 import java.io.IOException;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -19,7 +20,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
     private static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     private final ObjectMapper mapper = new ObjectMapper();
     private final JsonFactory factory = mapper.getFactory();
-    private final String host;
+    private final URL host;
     private final VaultToken token;
     private final String transitPath;
     private final String transitKeyName;
@@ -45,7 +46,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
         var data = "{\"plaintext\": \"" + Base64.getEncoder().encodeToString(unencryptedData) + "\"}";
 
         var request = HttpRequest.newBuilder()
-                .uri(VaultTransitEndpoint.ENCRYPT.uri(this.host, this.transitPath, transitKeyName))
+                .uri(VaultTransitEndpoint.ENCRYPT.from(this.host, this.transitPath, transitKeyName))
                 .header(HEADER_X_VAULT_TOKEN, this.token.stringValue())
                 .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
                 .POST(HttpRequest.BodyPublishers.ofString(data))
@@ -86,7 +87,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
         var data = "{\"ciphertext\": \"" + encryptedMasterKey + "\"}";
 
         var request = HttpRequest.newBuilder()
-                .uri(VaultTransitEndpoint.DECRYPT.uri(this.host, this.transitPath, transitKeyName))
+                .uri(VaultTransitEndpoint.DECRYPT.from(this.host, this.transitPath, transitKeyName))
                 .header(HEADER_X_VAULT_TOKEN, this.token.stringValue())
                 .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
                 .POST(HttpRequest.BodyPublishers.ofString(data))
@@ -128,7 +129,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
         var data = "{\"ciphertext\": \"" + String.copyValueOf(originalToken) + "\"}";
 
         var request = HttpRequest.newBuilder()
-                .uri(VaultTransitEndpoint.REWRAP.uri(this.host, this.transitPath, transitKeyName))
+                .uri(VaultTransitEndpoint.REWRAP.from(this.host, this.transitPath, transitKeyName))
                 .header(HEADER_X_VAULT_TOKEN, this.token.stringValue())
                 .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
                 .POST(HttpRequest.BodyPublishers.ofString(data))

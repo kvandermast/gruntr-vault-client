@@ -1,7 +1,10 @@
 package io.acuz.gruntr.cli;
 
+import io.acuz.gruntr.util.VaultValidationUtil;
 import io.acuz.gruntr.vault.model.VaultToken;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
@@ -12,13 +15,18 @@ final class CliProperties {
     private final Path inputFilePath;
     private final Path outputFilePath;
     private final VaultToken hcToken;
-    private final String hcServer;
+    private final URL hcServer;
     private final String hcTransitPath;
     private final String hcTransitKeyName;
 
 
     private CliProperties(Builder builder) {
-        this.hcServer = builder.hcServer;
+        try {
+            this.hcServer = new URL(builder.hcServer);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Vault server contains an invalid url", e);
+        }
+
         this.hcTransitPath = builder.hcTransitPath;
         this.hcTransitKeyName = builder.hcTransitKeyName;
         this.inputFilePath = builder.inputFilePath;
@@ -42,7 +50,7 @@ final class CliProperties {
         return hcToken;
     }
 
-    public String getHcServer() {
+    public URL getHcServer() {
         return hcServer;
     }
 
@@ -97,9 +105,10 @@ final class CliProperties {
 
             requireNonNull(this.inputFilePath, "Missing inputPath");
             requireNonNull(this.hcToken, "Missing Vault Token");
-            requireNonNull(this.hcServer, "Missing Vault Host/Server");
             requireNonNull(this.hcTransitPath, "Missing mounted Vault Transit Path");
             requireNonNull(this.hcTransitKeyName, "Missing Vault Transit Key");
+
+            VaultValidationUtil.checkVaultHost(this.hcServer);
         }
 
         private void prepare() {
@@ -116,7 +125,6 @@ final class CliProperties {
                             break;
                         case HC_VAULT_TOKEN:
                             this.hcToken = VaultToken.of(this.params.remove());
-
                             break;
                         case HC_VAULT_HOST:
                             this.hcServer = this.params.remove();

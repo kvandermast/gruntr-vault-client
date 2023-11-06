@@ -4,6 +4,7 @@ import io.acuz.gruntr.vault.VaultTransitRestClient;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.Objects;
 import java.util.Properties;
@@ -32,13 +33,13 @@ final class DecryptPropertiesFileCommand implements Command {
             String vaultTransitPath = originalProperties.getProperty("gruntr__vault_transit_path");
 
             if (!this.properties.getHcTransitKeyName().equals(vaultTransitKey)
-                    || !this.properties.getHcServer().equals(vaultHost)
+                    || !this.properties.getHcServer().toExternalForm().equals(vaultHost)
                     || !this.properties.getHcTransitPath().equals(vaultTransitPath)) {
                 throw new IllegalStateException("Configuration mismatch");
             }
 
             var vaultClient = VaultTransitRestClient.builder()
-                    .host(vaultHost)
+                    .host(URI.create(vaultHost).toURL())
                     .token(this.properties.getHcToken())
                     .transitPath(vaultTransitPath)
                     .transitKeyName(vaultTransitKey)
