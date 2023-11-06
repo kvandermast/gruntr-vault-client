@@ -118,4 +118,55 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
 
         throw new IllegalStateException("Unable to decrypt the requested value");
     }
+    @Override
+    public char[] rewrap(char[] originalToken) {
+        var httpClient = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.NEVER)
+                .version(HttpClient.Version.HTTP_1_1)
+                .build();
+
+        var data = "{\"ciphertext\": \"" + String.copyValueOf(originalToken) + "\"}";
+
+        var request = HttpRequest.newBuilder()
+                .uri(VaultTransitEndpoint.REWRAP.uri(this.host, this.transitPath, transitKeyName))
+                .header(HEADER_X_VAULT_TOKEN, String.copyValueOf(this.token))
+                .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
+                .POST(HttpRequest.BodyPublishers.ofString(data))
+                .build();
+
+        try {
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+            if (200 == response.statusCode()) {
+                var parser = factory.createParser(response.body());
+                var jsonTree = mapper.readTree(parser);
+
+                if (null != jsonTree && null != jsonTree.get("data")) {
+                    var jsonData = (JsonNode) jsonTree.get("data");
+
+                    if (jsonData.isObject() && null != jsonData.get("ciphertext")) {
+                        var ciphertext = jsonData.get("ciphertext").asText();
+
+                        return ciphertext.toCharArray();
+                    }
+                }
+            } else
+                System.out.println("Something went wrong decrypting with Vault");
+
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        throw new IllegalStateException("Unable to decrypt the requested value");
+    }
+
+    private char[] toCharArray(byte[] bytes) {
+        var chars = new char[bytes.length];
+
+        for (int i = 0; i < bytes.length; i++) {
+            chars[i] = (char) bytes[i];
+        }
+
+        return chars;
+    }
 }

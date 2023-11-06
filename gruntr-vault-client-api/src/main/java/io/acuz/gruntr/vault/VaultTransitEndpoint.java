@@ -4,7 +4,9 @@ import java.net.URI;
 
 enum VaultTransitEndpoint {
     ENCRYPT("encrypt"),
-    DECRYPT("decrypt");
+    DECRYPT("decrypt"),
+
+    REWRAP("rewrap");
 
     private final String action;
 

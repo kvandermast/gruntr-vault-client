@@ -11,6 +11,8 @@ public interface VaultTransitRestClient {
 
     byte[] decrypt(String encryptedMasterKey);
 
+    char[] rewrap(char[] originalToken);
+
     final class Builder {
         String host;
         char[] token;

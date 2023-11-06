@@ -23,6 +23,10 @@ final class CommandFactory {
                 return DecryptPropertiesFileCommand.builder()
                         .parameters(q)
                         .build();
+            case "rewrap":
+                return RewrapPropertiesFileCommand.builder()
+                        .parameters(q)
+                        .build();
             default:
                 throw new IllegalArgumentException("unknown action: " + action);
         }
