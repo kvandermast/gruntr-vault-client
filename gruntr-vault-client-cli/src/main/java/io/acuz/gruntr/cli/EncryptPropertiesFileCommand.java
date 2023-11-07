@@ -37,7 +37,7 @@ final class EncryptPropertiesFileCommand implements Command {
             originalProperties.load(fileInputStream);
             originalProperties.forEach((key, value) -> encryptedProperties.put(
                     key,
-                    vaultClient.encrypt(((String) value).getBytes())));
+                    String.copyValueOf(vaultClient.encrypt(((String) value).getBytes()))));
 
             encryptedProperties.put("gruntr__vault_host", this.properties.getHcServer().toExternalForm());
             encryptedProperties.put("gruntr__vault_transit_path", this.properties.getHcTransitPath());

@@ -53,7 +53,7 @@ final class DecryptPropertiesFileCommand implements Command {
                 if (!kn.toLowerCase().startsWith("gruntr__")) {
                     encryptedProperties.put(
                             key,
-                            new String(vaultClient.decrypt((String) value)));
+                            String.copyValueOf(vaultClient.decrypt(((String) value).toCharArray())));
                 }
             });
 

@@ -3,6 +3,7 @@ package io.acuz.gruntr.vault;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.acuz.gruntr.util.ArrayUtils;
 import io.acuz.gruntr.vault.model.VaultToken;
 
 import java.io.IOException;
@@ -40,23 +41,23 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
     }
 
     @Override
-    public String encrypt(byte[] value) {
-        var cipherText = this.request(
+    public char[] encrypt(byte[] value) {
+        return this.request(
                 VaultTransitEndpoint.ENCRYPT,
                 Base64.getEncoder().encodeToString(value).toCharArray()
         );
-
-        return String.copyValueOf(cipherText);
     }
 
     @Override
-    public byte[] decrypt(String value) {
+    public char[] decrypt(char[] value) {
         char[] base64EncodedPlainText = this.request(
                 VaultTransitEndpoint.DECRYPT,
-                value.toCharArray()
+                value
         );
 
-        return Base64.getDecoder().decode(String.copyValueOf(base64EncodedPlainText));
+        return ArrayUtils.toCharArray(
+                Base64.getDecoder().decode(
+                        String.copyValueOf(base64EncodedPlainText)));
     }
 
     @Override

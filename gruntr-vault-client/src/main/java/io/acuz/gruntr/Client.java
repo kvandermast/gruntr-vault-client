@@ -74,7 +74,7 @@ public final class Client {
                 var stringValue = ((String) val).trim();
 
                 if (stringValue.startsWith("vault:")) {
-                    properties.put(key, new String(vault.decrypt(stringValue)));
+                    properties.put(key, String.copyValueOf(vault.decrypt(stringValue.toCharArray())));
                 } else if (!((String) key).startsWith("gruntr__")) {
                     // non-encrypted value
                     properties.put(key, val);

@@ -10,9 +10,9 @@ public interface VaultTransitRestClient {
         return new Builder();
     }
 
-    String encrypt(byte[] value);
+    char[] encrypt(byte[] value);
 
-    byte[] decrypt(String value);
+    char[] decrypt(char[] value);
 
     char[] rewrap(char[] value);
 
