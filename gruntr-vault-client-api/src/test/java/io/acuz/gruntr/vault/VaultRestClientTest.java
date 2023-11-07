@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,33 +30,74 @@ class VaultRestClientTest {
     }
 
     @Test
-    void test_ShouldNotFailOnCall() throws MalformedURLException, InterruptedException {
-        var url = URI.create("http://localhost:8200").toURL();
+    void testVaultClientDecryption() throws MalformedURLException, InterruptedException {
+        var url = URI.create("http://localhost:" + MOCK_SERVER.getPort()).toURL();
+        var encryptedValue = "vault:v1:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==".toCharArray();
+        var mockResponseBody = "{ \"data\": {\"plaintext\": \"c29tZXRoaW5nIHZlcnkgc2VjcmV0\" } }";
 
-        MockResponse mockResponse = new MockResponse().setBody("{ \"data\": {\"plaintext\": \"c29tZXRoaW5nIHZlcnkgc2VjcmV0\" } }");
 
+        MockResponse mockResponse = new MockResponse().setBody(mockResponseBody);
         MOCK_SERVER.enqueue(mockResponse);
 
+        var client = createClient(url);
+        var result = client.decrypt(encryptedValue);
 
-        var client = VaultTransitRestClient
+        var mockrequest = MOCK_SERVER.takeRequest();
+
+        assertEquals("/v1/transit/project_name/decrypt/appkey", mockrequest.getPath());
+        assertEquals("root", mockrequest.getHeaders().get("X-Vault-Token"));
+        assertEquals("POST", mockrequest.getMethod());
+        assertEquals(
+                new String(Base64.getDecoder().decode("c29tZXRoaW5nIHZlcnkgc2VjcmV0")),
+                String.copyValueOf(result));
+    }
+
+    @Test
+    void testVaultClientEncryption() throws MalformedURLException, InterruptedException {
+        var url = URI.create("http://localhost:" + MOCK_SERVER.getPort()).toURL();
+        var mockBody = "{ \"data\": {\"ciphertext\": \"vault:v1:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==\" } }";
+
+        MockResponse mockResponse = new MockResponse().setBody(mockBody);
+        MOCK_SERVER.enqueue(mockResponse);
+
+        var client = createClient(url);
+        var result = client.encrypt("some test".getBytes());
+        var mockrequest = MOCK_SERVER.takeRequest();
+
+        assertEquals("/v1/transit/project_name/encrypt/appkey", mockrequest.getPath());
+        assertEquals("root", mockrequest.getHeaders().get("X-Vault-Token"));
+        assertEquals("POST", mockrequest.getMethod());
+        assertEquals("vault:v1:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==",
+                String.copyValueOf(result));
+    }
+
+    @Test
+    void testVaultClientRewrap() throws MalformedURLException, InterruptedException {
+        var url = URI.create("http://localhost:" + MOCK_SERVER.getPort()).toURL();
+        var encryptedValue = "vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==".toCharArray();
+        var mockBody = "{ \"data\": {\"ciphertext\": \"vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==\" } }";
+
+        MockResponse mockResponse = new MockResponse().setBody(mockBody);
+        MOCK_SERVER.enqueue(mockResponse);
+
+        var client = createClient(url);
+        var result = client.rewrap(encryptedValue);
+        var mockrequest = MOCK_SERVER.takeRequest();
+
+        assertEquals("/v1/transit/project_name/rewrap/appkey", mockrequest.getPath());
+        assertEquals("root", mockrequest.getHeaders().get("X-Vault-Token"));
+        assertEquals("POST", mockrequest.getMethod());
+        assertEquals("vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==",
+                String.copyValueOf(result));
+    }
+
+    private VaultTransitRestClient createClient(URL url) {
+        return VaultTransitRestClient
                 .builder()
                 .host(url)
                 .transitPath("transit/project_name")
                 .transitKeyName("appkey")
                 .token(VaultToken.of("root"))
                 .build();
-
-        var result = client.decrypt("vault:v1:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==".toCharArray());
-
-        assertEquals(1, MOCK_SERVER.getRequestCount());
-        var mockrequest = MOCK_SERVER.takeRequest();
-
-        assertEquals("/v1/transit/project_name/decrypt/appkey", mockrequest.getPath());
-        assertEquals("root", mockrequest.getHeaders().get("X-Vault-Token"));
-        assertEquals("POST", mockrequest.getMethod());
-
-        assertEquals(
-                new String(Base64.getDecoder().decode("c29tZXRoaW5nIHZlcnkgc2VjcmV0")),
-                String.copyValueOf(result));
     }
 }
