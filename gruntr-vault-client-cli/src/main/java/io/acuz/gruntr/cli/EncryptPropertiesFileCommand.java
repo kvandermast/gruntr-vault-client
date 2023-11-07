@@ -16,7 +16,6 @@
 
 package io.acuz.gruntr.cli;
 
-import io.acuz.gruntr.vault.VaultTransitRestClient;
 import io.acuz.gruntr.vault.exception.VaultException;
 
 import java.io.FileInputStream;
@@ -25,11 +24,10 @@ import java.util.ArrayDeque;
 import java.util.Objects;
 import java.util.Properties;
 
-final class EncryptPropertiesFileCommand extends AbstractPropertiesFileCommand implements Command {
+final class EncryptPropertiesFileCommand extends AbstractCommand implements Command {
     private EncryptPropertiesFileCommand(Builder builder) {
         super(builder.properties);
     }
-
 
     static Builder builder() {
         return new Builder();
@@ -38,12 +36,7 @@ final class EncryptPropertiesFileCommand extends AbstractPropertiesFileCommand i
     @Override
     public void run() {
         try (var fileInputStream = new FileInputStream(this.properties.getInputFilePath().toFile())) {
-            var vaultClient = VaultTransitRestClient.builder()
-                    .host(this.properties.getHcServer())
-                    .token(this.properties.getHcToken())
-                    .transitPath(this.properties.getHcTransitPath())
-                    .transitKeyName(this.properties.getHcTransitKeyName())
-                    .build();
+            var vaultClient = createClient();
 
             var originalProperties = new Properties();
             var encryptedProperties = new Properties();
@@ -59,11 +52,8 @@ final class EncryptPropertiesFileCommand extends AbstractPropertiesFileCommand i
                 }
             });
 
-            encryptedProperties.put("gruntr__vault_host", this.properties.getHcServer().toExternalForm());
-            encryptedProperties.put("gruntr__vault_transit_path", this.properties.getHcTransitPath());
-            encryptedProperties.put("gruntr__vault_transit_key", this.properties.getHcTransitKeyName());
 
-            flushProperties(encryptedProperties);
+            storeProperties(encryptedProperties);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

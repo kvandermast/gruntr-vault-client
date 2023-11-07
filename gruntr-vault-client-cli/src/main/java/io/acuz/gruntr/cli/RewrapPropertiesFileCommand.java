@@ -25,7 +25,7 @@ import java.util.ArrayDeque;
 import java.util.Objects;
 import java.util.Properties;
 
-final class RewrapPropertiesFileCommand extends AbstractPropertiesFileCommand implements Command {
+final class RewrapPropertiesFileCommand extends AbstractCommand implements Command {
     private RewrapPropertiesFileCommand(Builder builder) {
         super(builder.properties);
     }
@@ -66,7 +66,7 @@ final class RewrapPropertiesFileCommand extends AbstractPropertiesFileCommand im
                 }
             });
 
-            flushProperties(encryptedProperties);
+            storeProperties(encryptedProperties);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

@@ -16,18 +16,34 @@
 
 package io.acuz.gruntr.cli;
 
+import io.acuz.gruntr.vault.VaultTransitRestClient;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-abstract class AbstractPropertiesFileCommand {
+abstract class AbstractCommand {
     protected final CliProperties properties;
 
-    protected AbstractPropertiesFileCommand(CliProperties properties) {
+    protected AbstractCommand(CliProperties properties) {
         this.properties = properties;
     }
 
-    protected void flushProperties(Properties encryptedProperties) throws IOException {
+    protected VaultTransitRestClient createClient() {
+        return VaultTransitRestClient.builder()
+                .host(this.properties.getHcServer())
+                .token(this.properties.getHcToken())
+                .transitPath(this.properties.getHcTransitPath())
+                .transitKeyName(this.properties.getHcTransitKeyName())
+                .build();
+    }
+
+    protected void storeProperties(final Properties encryptedProperties) throws IOException {
+        encryptedProperties.put("gruntr__vault_host", this.properties.getHcServer().toExternalForm());
+        encryptedProperties.put("gruntr__vault_transit_path", this.properties.getHcTransitPath());
+        encryptedProperties.put("gruntr__vault_transit_key", this.properties.getHcTransitKeyName());
+
+
         if (null == properties.getOutputFilePath()) {
             encryptedProperties.store(System.out, "");
         } else {
