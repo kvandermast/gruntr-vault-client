@@ -174,3 +174,18 @@ class ClientTest {
 To grunt can either stand for "make a low, short guttural sound", like a pig, or for someone that used to be unskilled in a certain profession (to grunt yourself up the ladder).
 I just liked the idea that in a DevOps environment we remove the heavy lifting of "securing your sensitive information" away from the developers and into a tool that is made for it.
 Hashicorp Vault offers a large toolset of services, with the transit one being one of the most versatile ones around.
+
+# License
+Copyright (c) 2023. Gruntr/ACUZIO BV
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+https://www.gnu.org/licenses/gpl-3.0.html
+
