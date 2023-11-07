@@ -1,5 +1,22 @@
+/*
+ * Copyright (c) 2023. Gruntr/ACUZIO BV
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ */
+
 package io.acuz.gruntr.vault;
 
+import io.acuz.gruntr.util.VaultValidationUtil;
 import io.acuz.gruntr.vault.model.VaultToken;
 
 import java.net.URL;
@@ -29,10 +46,11 @@ public interface VaultTransitRestClient {
         }
 
         private void validate() {
-            Objects.requireNonNull(host, "Vault host should not be null");
             Objects.requireNonNull(token, "Vault token should not be null");
-            Objects.requireNonNull(transitPath, "Vault transit path should not be null");
-            Objects.requireNonNull(transitKeyName, "Vault transit key name should not be null");
+
+            VaultValidationUtil.checkVaultHost(host.toExternalForm());
+            VaultValidationUtil.checkVaultPathComponent(transitPath);
+            VaultValidationUtil.checkVaultPathComponent(transitKeyName);
         }
 
         public VaultTransitRestClientImpl.Builder host(URL hcServer) {
