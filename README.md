@@ -1,17 +1,25 @@
 # gruntr-vault-client
 
+- [Goal of Gruntr](#goal)
+- [Building the artifact](#building-the-artifact)
+- [About the CLI](#cli)
+- [Using the Client](#using-the-client)
+- [Why 'Gruntr'](#why-gruntr)
+- [License](LICENSE.md)
+
+
 ## Goal
 
 The idea behind the Gruntr Vault Client is based on the Mozilla SOPS file encryption, but with that difference that it solely relies on the Vault transit engine for
 
 - encryption of the property values
 - decryption of the property values 
-- rewrapping of encrypted values on key rotation
+- re-wrapping of encrypted values on key rotation
 - facilitator to encrypt and decrypt values on the fly
 
 It is available as a CLI and a Client that you can use in Java web applications
 
-## Building the dependencies
+## Building the artifact
 
 The project uses gradle to build the artifacts:
 
@@ -134,7 +142,6 @@ Would upgrade the version of the encrypted values:
 #
 #Mon Nov 06 15:01:52 CET 2023
 yet.another.secret=vault\:v2\:CtCylZ9QYnLioefOxPeytEyE5obOjFLlYWhH6FY/kIw/dODgr6G3WZjD6LU\=
-another.one=vault\:v2\:rk4/aVXoC5BPzKjJ+5rH17/IgzzWsXm5Y1rF6TjYvo9JayL0P/OR8g6R4fSqMOP11Q\=\=
 my.secret=vault\:v2\:mLVx9xS2vWyKoN0lnAbSoakaLQk3ZsuXaqkM3EmSOxHAsms1dsz5wR31XX2z4qUhew\=\=
 gruntr__vault_transit_path=transit/project_name
 gruntr__vault_transit_key=appkey
@@ -175,17 +182,5 @@ To grunt can either stand for "make a low, short guttural sound", like a pig, or
 I just liked the idea that in a DevOps environment we remove the heavy lifting of "securing your sensitive information" away from the developers and into a tool that is made for it.
 Hashicorp Vault offers a large toolset of services, with the transit one being one of the most versatile ones around.
 
-# License
-Copyright (c) 2023. Gruntr/ACUZIO BV
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-https://www.gnu.org/licenses/gpl-3.0.html
 
