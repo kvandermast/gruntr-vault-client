@@ -17,6 +17,7 @@
 package io.acuz.gruntr.cli;
 
 import io.acuz.gruntr.vault.VaultTransitRestClient;
+import io.acuz.gruntr.vault.exception.VaultException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -58,9 +59,13 @@ final class RewrapPropertiesFileCommand implements Command {
 
                 if (!kn.toLowerCase().startsWith("gruntr__")) {
 
-                    encryptedProperties.put(
-                            key,
-                            String.copyValueOf(vaultClient.rewrap(((String) value).toCharArray())));
+                    try {
+                        encryptedProperties.put(
+                                key,
+                                String.copyValueOf(vaultClient.rewrap(((String) value).toCharArray())));
+                    } catch (VaultException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             });
 

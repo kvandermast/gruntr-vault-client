@@ -14,18 +14,14 @@
  *
  */
 
-package io.acuz.gruntr.util;
+package io.acuz.gruntr.vault.exception;
 
-import org.junit.jupiter.api.Test;
+public final class VaultException extends Exception {
+    public VaultException(String message, Exception e) {
+        super(message, e);
+    }
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-class ArrayUtilsTest {
-    @Test
-    void test_ToCharArray() {
-        var message = "this is a test";
-        var chars = ArrayUtils.toCharArray(message.getBytes());
-
-        assertEquals(message, String.copyValueOf(chars));
+    public VaultException(String message) {
+        super(message);
     }
 }

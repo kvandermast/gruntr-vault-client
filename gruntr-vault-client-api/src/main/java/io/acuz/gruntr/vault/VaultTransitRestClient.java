@@ -17,6 +17,7 @@
 package io.acuz.gruntr.vault;
 
 import io.acuz.gruntr.util.VaultValidationUtil;
+import io.acuz.gruntr.vault.exception.VaultException;
 import io.acuz.gruntr.vault.model.VaultToken;
 
 import java.net.URL;
@@ -27,11 +28,11 @@ public interface VaultTransitRestClient {
         return new Builder();
     }
 
-    char[] encrypt(byte[] value);
+    char[] encrypt(byte[] value) throws VaultException;
 
-    char[] decrypt(char[] value);
+    char[] decrypt(char[] value) throws VaultException;
 
-    char[] rewrap(char[] value);
+    char[] rewrap(char[] value) throws VaultException;
 
     final class Builder {
         URL host;

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.acuz.gruntr.util.ArrayUtils;
+import io.acuz.gruntr.vault.exception.VaultException;
 import io.acuz.gruntr.vault.model.VaultToken;
 
 import java.io.IOException;
@@ -57,7 +58,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
     }
 
     @Override
-    public char[] encrypt(byte[] value) {
+    public char[] encrypt(byte[] value) throws VaultException {
         return this.request(
                 VaultTransitEndpoint.ENCRYPT,
                 Base64.getEncoder().encodeToString(value).toCharArray()
@@ -65,7 +66,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
     }
 
     @Override
-    public char[] decrypt(char[] value) {
+    public char[] decrypt(char[] value) throws VaultException {
         char[] base64EncodedPlainText = this.request(
                 VaultTransitEndpoint.DECRYPT,
                 value
@@ -77,7 +78,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
     }
 
     @Override
-    public char[] rewrap(char[] value) {
+    public char[] rewrap(char[] value) throws VaultException {
         return this.request(
                 VaultTransitEndpoint.REWRAP,
                 value
@@ -88,7 +89,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
             VaultTransitEndpoint endpoint,
             char[] value
 
-    ) {
+    ) throws VaultException {
         var inputFieldName = endpoint == VaultTransitEndpoint.ENCRYPT ? JSON_PLAINTEXT_FIELD : JSON_CIPHERTEXT_FIELD;
         var outputFieldName = endpoint == VaultTransitEndpoint.DECRYPT ? JSON_PLAINTEXT_FIELD : JSON_CIPHERTEXT_FIELD;
 
@@ -122,13 +123,13 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
                         return ciphertext.toCharArray();
                     }
                 }
-            } else
-                System.out.println("Something went wrong retrieving the value from Vault");
 
+                throw new VaultException("Vault returned unexpected body structure");
+            } else {
+                throw new VaultException("Vault was unable to handle request, returned statusCode: " + response.statusCode());
+            }
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new VaultException("Unable to communicate with Vault", e);
         }
-
-        throw new IllegalStateException("Unable to retrieve the requested value for operation: " + endpoint.name());
     }
 }

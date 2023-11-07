@@ -16,6 +16,7 @@
 
 package io.acuz.gruntr.vault;
 
+import io.acuz.gruntr.vault.exception.VaultException;
 import io.acuz.gruntr.vault.model.VaultToken;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -46,7 +47,7 @@ class VaultRestClientTest {
     }
 
     @Test
-    void testVaultClientDecryption() throws MalformedURLException, InterruptedException {
+    void testVaultClientDecryption() throws MalformedURLException, InterruptedException, VaultException {
         var url = URI.create("http://localhost:" + MOCK_SERVER.getPort()).toURL();
         var encryptedValue = "vault:v1:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==".toCharArray();
         var mockResponseBody = "{ \"data\": {\"plaintext\": \"c29tZXRoaW5nIHZlcnkgc2VjcmV0\" } }";
@@ -69,7 +70,7 @@ class VaultRestClientTest {
     }
 
     @Test
-    void testVaultClientEncryption() throws MalformedURLException, InterruptedException {
+    void testVaultClientEncryption() throws MalformedURLException, InterruptedException, VaultException {
         var url = URI.create("http://localhost:" + MOCK_SERVER.getPort()).toURL();
         var mockBody = "{ \"data\": {\"ciphertext\": \"vault:v1:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==\" } }";
 
@@ -88,7 +89,7 @@ class VaultRestClientTest {
     }
 
     @Test
-    void testVaultClientRewrap() throws MalformedURLException, InterruptedException {
+    void testVaultClientRewrap() throws MalformedURLException, InterruptedException, VaultException {
         var url = URI.create("http://localhost:" + MOCK_SERVER.getPort()).toURL();
         var encryptedValue = "vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==".toCharArray();
         var mockBody = "{ \"data\": {\"ciphertext\": \"vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==\" } }";

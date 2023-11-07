@@ -17,6 +17,7 @@
 package io.acuz.gruntr.cli;
 
 import io.acuz.gruntr.vault.VaultTransitRestClient;
+import io.acuz.gruntr.vault.exception.VaultException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -51,9 +52,15 @@ final class EncryptPropertiesFileCommand implements Command {
             var encryptedProperties = new Properties();
 
             originalProperties.load(fileInputStream);
-            originalProperties.forEach((key, value) -> encryptedProperties.put(
-                    key,
-                    String.copyValueOf(vaultClient.encrypt(((String) value).getBytes()))));
+            originalProperties.forEach((key, value) -> {
+                try {
+                    encryptedProperties.put(
+                            key,
+                            String.copyValueOf(vaultClient.encrypt(((String) value).getBytes())));
+                } catch (VaultException e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
             encryptedProperties.put("gruntr__vault_host", this.properties.getHcServer().toExternalForm());
             encryptedProperties.put("gruntr__vault_transit_path", this.properties.getHcTransitPath());

@@ -17,6 +17,7 @@
 package io.acuz.gruntr;
 
 import io.acuz.gruntr.vault.VaultTransitRestClient;
+import io.acuz.gruntr.vault.exception.VaultException;
 import io.acuz.gruntr.vault.model.VaultToken;
 
 import java.io.FileInputStream;
@@ -90,7 +91,11 @@ public final class Client {
                 var stringValue = ((String) val).trim();
 
                 if (stringValue.startsWith("vault:")) {
-                    properties.put(key, String.copyValueOf(vault.decrypt(stringValue.toCharArray())));
+                    try {
+                        properties.put(key, String.copyValueOf(vault.decrypt(stringValue.toCharArray())));
+                    } catch (VaultException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else if (!((String) key).startsWith("gruntr__")) {
                     // non-encrypted value
                     properties.put(key, val);
