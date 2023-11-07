@@ -14,6 +14,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public final class VaultTransitRestClientImpl implements VaultTransitRestClient {
+    private static final String JSON_DATA_FIELD = "data";
+    private static final String JSON_PLAINTEXT_FIELD = "plaintext";
+    private static final String JSON_CIPHERTEXT_FIELD = "ciphertext";
     @SuppressWarnings("UastIncorrectHttpHeaderInspection")
     private static final String HEADER_X_VAULT_TOKEN = "X-Vault-Token";
     private static final String HEADER_ACCEPT = "Accept";
@@ -37,99 +40,50 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
     }
 
     @Override
-    public String encrypt(byte[] unencryptedData) {
-        var httpClient = HttpClient.newBuilder()
-                .followRedirects(HttpClient.Redirect.NEVER)
-                .version(HttpClient.Version.HTTP_1_1)
-                .build();
+    public String encrypt(byte[] value) {
+        var cipherText = this.request(
+                VaultTransitEndpoint.ENCRYPT,
+                Base64.getEncoder().encodeToString(value).toCharArray()
+        );
 
-        var data = "{\"plaintext\": \"" + Base64.getEncoder().encodeToString(unencryptedData) + "\"}";
-
-        var request = HttpRequest.newBuilder()
-                .uri(VaultTransitEndpoint.ENCRYPT.from(this.host, this.transitPath, transitKeyName))
-                .header(HEADER_X_VAULT_TOKEN, this.token.stringValue())
-                .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
-                .POST(HttpRequest.BodyPublishers.ofString(data))
-                .build();
-
-        try {
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-
-            if (200 == response.statusCode()) {
-                var parser = factory.createParser(response.body());
-                var jsonTree = mapper.readTree(parser);
-
-                if (null != jsonTree && null != jsonTree.get("data")) {
-                    var jsonData = (JsonNode) jsonTree.get("data");
-
-                    if (jsonData.isObject() && null != jsonData.get("ciphertext")) {
-                        return jsonData.get("ciphertext").asText();
-                    }
-                }
-            } else
-                System.out.println("Something went wrong decrypting with Vault");
-
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        throw new IllegalStateException("Unable to encrypt the requested value");
-
+        return String.copyValueOf(cipherText);
     }
 
     @Override
-    public byte[] decrypt(String encryptedMasterKey) {
-        var httpClient = HttpClient.newBuilder()
-                .followRedirects(HttpClient.Redirect.NEVER)
-                .version(HttpClient.Version.HTTP_1_1)
-                .build();
+    public byte[] decrypt(String value) {
+        char[] base64EncodedPlainText = this.request(
+                VaultTransitEndpoint.DECRYPT,
+                value.toCharArray()
+        );
 
-        var data = "{\"ciphertext\": \"" + encryptedMasterKey + "\"}";
-
-        var request = HttpRequest.newBuilder()
-                .uri(VaultTransitEndpoint.DECRYPT.from(this.host, this.transitPath, transitKeyName))
-                .header(HEADER_X_VAULT_TOKEN, this.token.stringValue())
-                .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
-                .POST(HttpRequest.BodyPublishers.ofString(data))
-                .build();
-
-        try {
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-
-            if (200 == response.statusCode()) {
-                var parser = factory.createParser(response.body());
-                var jsonTree = mapper.readTree(parser);
-
-                if (null != jsonTree && null != jsonTree.get("data")) {
-                    var jsonData = (JsonNode) jsonTree.get("data");
-
-                    if (jsonData.isObject() && null != jsonData.get("plaintext")) {
-                        var plainText = jsonData.get("plaintext").asText();
-
-                        return Base64.getDecoder().decode(plainText);
-                    }
-                }
-            } else
-                System.out.println("Something went wrong decrypting with Vault");
-
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        throw new IllegalStateException("Unable to decrypt the requested value");
+        return Base64.getDecoder().decode(String.copyValueOf(base64EncodedPlainText));
     }
 
     @Override
-    public char[] rewrap(char[] originalToken) {
+    public char[] rewrap(char[] value) {
+        return this.request(
+                VaultTransitEndpoint.REWRAP,
+                value
+        );
+    }
+
+    private char[] request(
+            VaultTransitEndpoint endpoint,
+            char[] value
+
+    ) {
+        var inputFieldName = endpoint == VaultTransitEndpoint.ENCRYPT ? JSON_PLAINTEXT_FIELD : JSON_CIPHERTEXT_FIELD;
+        var outputFieldName = endpoint == VaultTransitEndpoint.DECRYPT ? JSON_PLAINTEXT_FIELD : JSON_CIPHERTEXT_FIELD;
+
         var httpClient = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NEVER)
                 .version(HttpClient.Version.HTTP_1_1)
                 .build();
 
-        var data = "{\"ciphertext\": \"" + String.copyValueOf(originalToken) + "\"}";
+        var data = String.format("{\"%s\": \"%s\"}", inputFieldName, String.copyValueOf(value));
 
         var request = HttpRequest.newBuilder()
-                .uri(VaultTransitEndpoint.REWRAP.from(this.host, this.transitPath, transitKeyName))
+                .uri(endpoint.from(this.host, this.transitPath, transitKeyName))
                 .header(HEADER_X_VAULT_TOKEN, this.token.stringValue())
                 .header(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
                 .POST(HttpRequest.BodyPublishers.ofString(data))
@@ -142,22 +96,22 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
                 var parser = factory.createParser(response.body());
                 var jsonTree = mapper.readTree(parser);
 
-                if (null != jsonTree && null != jsonTree.get("data")) {
-                    var jsonData = (JsonNode) jsonTree.get("data");
+                if (null != jsonTree && null != jsonTree.get(JSON_DATA_FIELD)) {
+                    var jsonData = (JsonNode) jsonTree.get(JSON_DATA_FIELD);
 
-                    if (jsonData.isObject() && null != jsonData.get("ciphertext")) {
-                        var ciphertext = jsonData.get("ciphertext").asText();
+                    if (jsonData.isObject() && null != jsonData.get(outputFieldName)) {
+                        var ciphertext = jsonData.get(outputFieldName).asText();
 
                         return ciphertext.toCharArray();
                     }
                 }
             } else
-                System.out.println("Something went wrong decrypting with Vault");
+                System.out.println("Something went wrong retrieving the value from Vault");
 
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        throw new IllegalStateException("Unable to decrypt the requested value");
+        throw new IllegalStateException("Unable to retrieve the requested value for operation: " + endpoint.name());
     }
 }

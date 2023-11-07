@@ -10,11 +10,11 @@ public interface VaultTransitRestClient {
         return new Builder();
     }
 
-    String encrypt(byte[] unencryptedData);
+    String encrypt(byte[] value);
 
-    byte[] decrypt(String encryptedMasterKey);
+    byte[] decrypt(String value);
 
-    char[] rewrap(char[] originalToken);
+    char[] rewrap(char[] value);
 
     final class Builder {
         URL host;
