@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 public final class VaultValidationUtil {
     public static final Pattern HTTP_SCHEME_PATTERN = Pattern.compile("^https?$", Pattern.CASE_INSENSITIVE);
+    public static final Pattern URL_PATH_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9/_]*$", Pattern.CASE_INSENSITIVE);
 
     private VaultValidationUtil() {
         //no-op
@@ -34,6 +35,16 @@ public final class VaultValidationUtil {
 
         if (null != uri.getQuery() && !uri.getQuery().isEmpty()) {
             throw new IllegalArgumentException("Invalid Vault host provided: we don't support query parameters, got " + uri.getQuery());
+        }
+    }
+
+    public static void checkVaultPathComponent(String value) {
+        if (null == value || value.trim().isEmpty()) {
+            throw new NullPointerException("Vault transit value or key name is null or empty");
+        }
+
+        if (!URL_PATH_PATTERN.matcher(value).matches()) {
+            throw new IllegalArgumentException("Invalid Vault transit value or key name provided, received '" + value + "' does not match '" + URL_PATH_PATTERN.pattern() + "'");
         }
     }
 }

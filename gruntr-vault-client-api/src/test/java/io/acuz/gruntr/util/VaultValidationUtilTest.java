@@ -40,4 +40,26 @@ class VaultValidationUtilTest {
         assertDoesNotThrow(() -> VaultValidationUtil.checkVaultHost("https://localhost:8200"));
         assertDoesNotThrow(() -> VaultValidationUtil.checkVaultHost("HTTps://vault:8200/v1"));
     }
+
+    @Test
+    void whenVaultPathIsNotValid() {
+        assertThrows(NullPointerException.class, () -> VaultValidationUtil.checkVaultPathComponent(null));
+        assertThrows(NullPointerException.class, () -> VaultValidationUtil.checkVaultPathComponent(""));
+        assertThrows(NullPointerException.class, () -> VaultValidationUtil.checkVaultPathComponent("   "));
+
+        assertThrows(IllegalArgumentException.class, () -> VaultValidationUtil.checkVaultPathComponent("/"));
+        assertThrows(IllegalArgumentException.class, () -> VaultValidationUtil.checkVaultPathComponent("/ccc"));
+        assertThrows(IllegalArgumentException.class, () -> VaultValidationUtil.checkVaultPathComponent("ccc?redirect"));
+        assertThrows(IllegalArgumentException.class, () -> VaultValidationUtil.checkVaultPathComponent("ccc?redirect=true"));
+        assertThrows(IllegalArgumentException.class, () -> VaultValidationUtil.checkVaultPathComponent("garbage\\"));
+        assertThrows(IllegalArgumentException.class, () -> VaultValidationUtil.checkVaultPathComponent("gar^\\"));
+        assertThrows(IllegalArgumentException.class, () -> VaultValidationUtil.checkVaultPathComponent("gar "));
+
+        assertDoesNotThrow(() -> VaultValidationUtil.checkVaultPathComponent("transit"));
+        assertDoesNotThrow(() -> VaultValidationUtil.checkVaultPathComponent("transit/project"));
+        assertDoesNotThrow(() -> VaultValidationUtil.checkVaultPathComponent("transit/project_name"));
+        assertDoesNotThrow(() -> VaultValidationUtil.checkVaultPathComponent("transit/project/name_"));
+
+        assertThrows(IllegalArgumentException.class, () -> VaultValidationUtil.checkVaultPathComponent("_key"));
+    }
 }

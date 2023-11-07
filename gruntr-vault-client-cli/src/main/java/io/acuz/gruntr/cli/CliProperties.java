@@ -105,10 +105,10 @@ final class CliProperties {
 
             requireNonNull(this.inputFilePath, "Missing inputPath");
             requireNonNull(this.hcToken, "Missing Vault Token");
-            requireNonNull(this.hcTransitPath, "Missing mounted Vault Transit Path");
-            requireNonNull(this.hcTransitKeyName, "Missing Vault Transit Key");
 
             VaultValidationUtil.checkVaultHost(this.hcServer);
+            VaultValidationUtil.checkVaultPathComponent(this.hcTransitPath);
+            VaultValidationUtil.checkVaultPathComponent(this.hcTransitKeyName);
         }
 
         private void prepare() {
