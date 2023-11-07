@@ -4,6 +4,7 @@
 - [Building the artifact](#building-the-artifact)
 - [About the CLI](#cli)
 - [Using the Client](#using-the-client)
+- [Running the Vault docker image]
 - [Why 'Gruntr'](#why-gruntr)
 - [License](LICENSE.md)
 
@@ -183,4 +184,10 @@ I just liked the idea that in a DevOps environment we remove the heavy lifting o
 Hashicorp Vault offers a large toolset of services, with the transit one being one of the most versatile ones around.
 
 
+# Running the Vault docker image
 
+In the folder `vault-mockup-docker-compose`, you can find a docker-compose definition that you can start to have a local Vault running.
+
+> It is exposed over port `8201` instead of the classic `8200` port;
+
+There is also a `start.sh` script in the `scripts` folder, this creates a transit engine with a different algorithm.
