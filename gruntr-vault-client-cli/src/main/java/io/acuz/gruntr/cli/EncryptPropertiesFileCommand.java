@@ -25,12 +25,9 @@ import java.util.ArrayDeque;
 import java.util.Objects;
 import java.util.Properties;
 
-final class EncryptPropertiesFileCommand implements Command {
-    private final CliProperties properties;
-
-
+final class EncryptPropertiesFileCommand extends AbstractPropertiesFileCommand implements Command {
     private EncryptPropertiesFileCommand(Builder builder) {
-        this.properties = builder.properties;
+        super(builder.properties);
     }
 
 
@@ -66,10 +63,7 @@ final class EncryptPropertiesFileCommand implements Command {
             encryptedProperties.put("gruntr__vault_transit_path", this.properties.getHcTransitPath());
             encryptedProperties.put("gruntr__vault_transit_key", this.properties.getHcTransitKeyName());
 
-            if (null == properties.getOutputFilePath()) {
-                encryptedProperties.store(System.out, "");
-            }
-
+            flushProperties(encryptedProperties);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

@@ -19,6 +19,7 @@ package io.acuz.gruntr.cli;
 import io.acuz.gruntr.util.VaultValidationUtil;
 import io.acuz.gruntr.vault.model.VaultToken;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -125,6 +126,30 @@ final class CliProperties {
             VaultValidationUtil.checkVaultHost(this.hcServer);
             VaultValidationUtil.checkVaultPathComponent(this.hcTransitPath);
             VaultValidationUtil.checkVaultPathComponent(this.hcTransitKeyName);
+
+            if (null != this.outputFilePath) {
+                var file = this.outputFilePath.toFile();
+
+                if (file.isDirectory()) {
+                    //it's a directory, so we're going to append a filename to it
+                    this.outputFilePath = Paths.get(this.outputFilePath.toString(), "encrypted.properties");
+                    file = this.outputFilePath.toFile();
+                }
+
+                if (file.exists() && file.delete()) {
+                    //it exists, so let's delete it
+                    System.out.println("Clean-up of file: " + file.getAbsolutePath());
+                }
+
+                try {
+                    if (file.createNewFile()) {
+                        System.out.println("Created a new file: " + file.getAbsolutePath());
+                    }
+                } catch (IOException e) {
+                    System.err.println(e.getMessage());
+                    throw new RuntimeException("Unable to create output file " + this.outputFilePath, e);
+                }
+            }
         }
 
         private void prepare() {

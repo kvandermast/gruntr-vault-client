@@ -85,11 +85,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
         );
     }
 
-    private char[] request(
-            VaultTransitEndpoint endpoint,
-            char[] value
-
-    ) throws VaultException {
+    private char[] request(VaultTransitEndpoint endpoint, char[] value) throws VaultException {
         var inputFieldName = endpoint == VaultTransitEndpoint.ENCRYPT ? JSON_PLAINTEXT_FIELD : JSON_CIPHERTEXT_FIELD;
         var outputFieldName = endpoint == VaultTransitEndpoint.DECRYPT ? JSON_PLAINTEXT_FIELD : JSON_CIPHERTEXT_FIELD;
 
