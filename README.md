@@ -74,6 +74,15 @@ gruntr__vault_host=http\://vault\:8201
 
 The file contains correctly encoded values for a properties file.
 
+By default, ALL keys in the result are encrypted. You can tailor the behaviour by adding the `--keys` or `-k` parameter.
+- if you pass `-k :secrets`, it will only encrypt keys that have `token`, `password` or `secret` in their key name,
+- if you pass `-k :secrets,username`, it will encrypt the keys as mentioned above, but also the fields containing username.
+- if you pass `-k :secrets,(username|userid)`, it will act as the previous one, and also check for userid next to username.
+
+You can add whatever configuration you desire.
+
+> Note that `:secrets` is a group, ergo it starts with the colon (':'). Your own keys (such as username for example) are to be passed as is.
+
 ### Decryption
 
 Give the example above, you run the CLI with the following parameters:
