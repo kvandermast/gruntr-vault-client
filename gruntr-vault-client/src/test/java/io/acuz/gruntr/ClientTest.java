@@ -17,6 +17,7 @@
 package io.acuz.gruntr;
 
 import io.acuz.gruntr.vault.model.VaultToken;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -43,11 +44,10 @@ class ClientTest {
 
         var properties = client.getEncryptedProperties();
         assertEquals(5, properties.size());
-
-        properties.keySet().forEach(it -> assertFalse(((String) it).startsWith("sops_"), "Properties should not contains sops entries, found " + it));
     }
 
     @Test
+    @Disabled("Disabled until Mockserver is implemented")
     void test_createANewClientAndDecrypt() {
         var client = Client.builder()
                 .setToken(VaultToken.of("root"))

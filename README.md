@@ -4,7 +4,7 @@
 - [Building the artifact](#building-the-artifact)
 - [About the CLI](#cli)
 - [Using the Client](#using-the-client)
-- [Running the Vault docker image]
+- [Running the Vault docker image](#running-the-vault-docker-image)
 - [Why 'Gruntr'](#why-gruntr)
 - [License](LICENSE.md)
 

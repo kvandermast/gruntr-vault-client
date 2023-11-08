@@ -31,6 +31,7 @@ import java.net.URL;
 import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("SpellCheckingInspection")
 class VaultRestClientTest {
@@ -106,6 +107,44 @@ class VaultRestClientTest {
         assertEquals("POST", mockrequest.getMethod());
         assertEquals("vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==",
                 String.copyValueOf(result));
+    }
+
+    @Test
+    void testVaultClientExceptionForInvalidStatusCode() throws MalformedURLException, InterruptedException {
+        var url = URI.create("http://localhost:" + MOCK_SERVER.getPort()).toURL();
+        var encryptedValue = "vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==".toCharArray();
+
+        MockResponse mockResponse = new MockResponse().setResponseCode(403).setBody("");
+        MOCK_SERVER.enqueue(mockResponse);
+
+        var client = createClient(url);
+        assertThrows(VaultException.class, () -> client.rewrap(encryptedValue));
+        var mockRequest = MOCK_SERVER.takeRequest();
+
+        assertEquals("/v1/transit/project_name/rewrap/appkey", mockRequest.getPath());
+        assertEquals("root", mockRequest.getHeaders().get("X-Vault-Token"));
+        assertEquals("POST", mockRequest.getMethod());
+    }
+
+    @Test
+    void testVaultClientExceptionForInvalidDataStructure() throws MalformedURLException, InterruptedException {
+        var url = URI.create("http://localhost:" + MOCK_SERVER.getPort()).toURL();
+        var encryptedValue = "vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==".toCharArray();
+        var mockBody = "{ \"atad\": {\"txetrepihc\": \"vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==\" } }";
+        var mockBody2 = "{ \"data\": {\"txetrepihc\": \"vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==\" } }";
+
+        MOCK_SERVER.enqueue(new MockResponse().setBody(mockBody));
+        MOCK_SERVER.enqueue(new MockResponse().setBody(mockBody2));
+
+        var client = createClient(url);
+
+        // no "data" element found
+        assertThrows(VaultException.class, () -> client.rewrap(encryptedValue));
+        MOCK_SERVER.takeRequest(); // remove from the queue
+
+        // no "ciphertext" element found
+        assertThrows(VaultException.class, () -> client.rewrap(encryptedValue));
+        MOCK_SERVER.takeRequest(); // remove from the queue
     }
 
     private VaultTransitRestClient createClient(URL url) {
