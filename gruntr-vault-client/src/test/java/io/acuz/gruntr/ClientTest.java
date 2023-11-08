@@ -28,12 +28,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class ClientTest {
     @Test
     void test_createANewClientWithoutParameters() {
-        assertThrows(NullPointerException.class, () -> Client.builder().build());
+        assertThrows(NullPointerException.class, () -> ClientImpl.builder().build());
     }
 
     @Test
     void test_createANewClientWithParameters() {
-        var client = Client.builder()
+        var client = ClientImpl.builder()
                 .setToken(VaultToken.of("root"))
                 .setPath(Path.of("/Users/Kris/fod_workspace/sops_playground", "application-encrypted.properties"))
                 .build();
@@ -49,14 +49,14 @@ class ClientTest {
     @Test
     @Disabled("Disabled until Mockserver is implemented")
     void test_createANewClientAndDecrypt() {
-        var client = Client.builder()
+        var client = ClientImpl.builder()
                 .setToken(VaultToken.of("root"))
                 .setPath(Path.of("/Users/Kris/fod_workspace/sops_playground", "application-encrypted.properties"))
                 .build();
 
         assertNotNull(client);
 
-        var properties = client.getDecryptedProperties();
+        var properties = client.decryptProperties();
         assertEquals(2, properties.size());
     }
 }

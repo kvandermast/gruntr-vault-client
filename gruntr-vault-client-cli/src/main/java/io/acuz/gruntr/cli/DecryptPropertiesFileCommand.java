@@ -16,7 +16,7 @@
 
 package io.acuz.gruntr.cli;
 
-import io.acuz.gruntr.Client;
+import io.acuz.gruntr.ClientImpl;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -37,12 +37,12 @@ final class DecryptPropertiesFileCommand implements Command {
 
     @Override
     public void run() {
-        var client = Client.builder()
+        var client = ClientImpl.builder()
                 .setPath(this.properties.getInputFilePath())
                 .setToken(this.properties.getHcToken())
                 .build();
 
-        var decryptedProperties = client.getDecryptedProperties();
+        var decryptedProperties = client.decryptProperties();
         try {
             if (null == properties.getOutputFilePath()) {
                 decryptedProperties.store(System.out, "");
