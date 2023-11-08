@@ -39,7 +39,6 @@ class ClientTest {
                 .build();
 
         assertNotNull(client);
-        assertNotNull(client.getPath());
         assertNotNull(client.getEncryptedProperties());
 
         var properties = client.getEncryptedProperties();

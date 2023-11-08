@@ -59,10 +59,6 @@ public final class ClientImpl implements Client {
         }
     }
 
-    public Path getPath() {
-        return path;
-    }
-
     @Override
     public Properties decryptProperties() {
         var originalProperties = this.getEncryptedProperties();
@@ -111,7 +107,7 @@ public final class ClientImpl implements Client {
             return this;
         }
 
-        public ClientImpl build() {
+        public Client build() {
             validate();
             return new ClientImpl(this);
         }
