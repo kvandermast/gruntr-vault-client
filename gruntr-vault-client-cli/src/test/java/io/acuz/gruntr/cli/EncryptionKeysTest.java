@@ -16,6 +16,8 @@
 
 package io.acuz.gruntr.cli;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;
@@ -23,52 +25,58 @@ import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EncryptionKeysTest {
+    @BeforeAll
+    static void beforeAll() {
+        EncryptionKeys.clear();
+    }
+
+    @AfterAll
+    static void afterAll() {
+        EncryptionKeys.clear();
+    }
+
     @Test
     void testAll() {
+        EncryptionKeys.register("(fish|chips)", "crisps", "(^kit|kat$)");
+        testWithCustomExpressions(EncryptionKeys.compile());
+
         EncryptionKeys.register(EncryptionKeys.SECRETS);
         testWithSecretsGroup(EncryptionKeys.compile());
-        EncryptionKeys.clear();
 
         EncryptionKeys.register(EncryptionKeys.ALL);
         testWithAllRegExp(EncryptionKeys.compile());
-        EncryptionKeys.clear();
-
-
-        EncryptionKeys.register(EncryptionKeys.SECRETS, "(fish|chips)", "crisps", "(^kit|kat$)");
-        testWithCustomExpressions(EncryptionKeys.compile());
-        EncryptionKeys.clear();
-
     }
 
     private void testWithSecretsGroup(Pattern exp) {
-        assertTrue(exp.matcher("secret").find());
-        assertTrue(exp.matcher("token").find());
-        assertTrue(exp.matcher("password").find());
+        assertTrue(exp.matcher("secret").matches());
+        assertTrue(exp.matcher("token").matches());
+        assertTrue(exp.matcher("password").matches());
 
-        assertTrue(exp.matcher("my.secret").find());
-        assertTrue(exp.matcher("token.secure").find());
-        assertTrue(exp.matcher("my.password.for.a.service").find());
-        assertFalse(exp.matcher("my.plaintext").find());
+        assertTrue(exp.matcher("my.secret").matches());
+        assertTrue(exp.matcher("token.secure").matches());
+        assertTrue(exp.matcher("my.password.for.a.service").matches());
+        assertFalse(exp.matcher("my.plaintext").matches());
     }
 
     private void testWithAllRegExp(Pattern exp) {
-        assertTrue(exp.matcher("").find());
-        assertTrue(exp.matcher(" ").find());
-        assertTrue(exp.matcher("test").find());
-        assertTrue(exp.matcher("some.secure.token").find());
-        assertTrue(exp.matcher("some_password").find());
-        assertTrue(exp.matcher("some/secret").find());
+        assertTrue(exp.matcher("test").matches());
+        assertTrue(exp.matcher("some.secure.token").matches());
+        assertTrue(exp.matcher("some_password").matches());
+        assertTrue(exp.matcher("some/secret").matches());
+
+        assertTrue(exp.matcher("my.plaintext").matches());
     }
 
     private void testWithCustomExpressions(Pattern exp) {
-        assertTrue(exp.matcher("my.secret").find());
-        assertTrue(exp.matcher("token.secure").find());
-        assertTrue(exp.matcher("my.password.for.a.service").find());
-        assertTrue(exp.matcher("my.fish.security").find());
-        assertTrue(exp.matcher("my.crisps.security").find());
-        assertTrue(exp.matcher("my.chips").find());
-        assertTrue(exp.matcher("kit.and.kat").find());
+        // these are registered
+        assertTrue(exp.matcher("my.fish.security").matches());
+        assertTrue(exp.matcher("my.crisps.security").matches());
+        assertTrue(exp.matcher("my.chips").matches());
+        assertTrue(exp.matcher("kit.and.kat").matches());
 
-        assertFalse(exp.matcher("my.plaintext").find());
+        //these are not
+        assertFalse(exp.matcher("secret").matches());
+        assertFalse(exp.matcher("token").matches());
+        assertFalse(exp.matcher("password").matches());
     }
 }

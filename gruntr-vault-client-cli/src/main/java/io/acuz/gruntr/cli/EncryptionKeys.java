@@ -17,6 +17,7 @@
 package io.acuz.gruntr.cli;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -24,7 +25,7 @@ import java.util.regex.PatternSyntaxException;
 final class EncryptionKeys {
     public static final String ALL = ".*";
     public static final String SECRETS = "(secret|token|password)";
-    private static final List<String> PATTERNS = new ArrayList<>();
+    private static final List<String> PATTERNS = Collections.synchronizedList(new ArrayList<>());
 
     private EncryptionKeys() {
         //no-op
@@ -52,18 +53,20 @@ final class EncryptionKeys {
      * Clears the list of registered patterns
      */
     static void clear() {
-        PATTERNS.clear();
+        synchronized (PATTERNS) {
+            PATTERNS.clear();
+        }
     }
 
     /**
      * Compiles the registered regexp into a single RegExp instance.
-     * For example, registering 'secret' and 'password' would generate a regexp '(secret|password)' which means that
+     * For example, registering 'secret' and 'password' would generate a regexp '.*(secret|password).*' which means that
      * the key must either contain secret or password to match. The matching is performed case-insensitive.
      *
      * @return the compiled regexp.
      */
     public static Pattern compile() {
-        var buffer = new StringBuilder().append('(');
+        var buffer = new StringBuilder().append(".*(");
 
         for (int i = 0; i < PATTERNS.size(); i++) {
             if (i > 0) {
@@ -73,7 +76,7 @@ final class EncryptionKeys {
             buffer.append(PATTERNS.get(i));
         }
 
-        buffer.append(')');
+        buffer.append(").*");
 
         return Pattern.compile(buffer.toString(), Pattern.CASE_INSENSITIVE);
     }
