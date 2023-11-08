@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public final class EncryptionKeys {
+final class EncryptionKeys {
     public static final String ALL = ".*";
     public static final String SECRETS = "(secret|token|password)";
     private static final List<String> PATTERNS = new ArrayList<>();
@@ -29,8 +29,18 @@ public final class EncryptionKeys {
         //no-op
     }
 
-    public static void register(String pattern) {
+    public static void register(String pattern, String... patterns) {
         PATTERNS.add(Pattern.compile(pattern).pattern());
+
+        if(null != patterns) {
+            for (String p : patterns) {
+                PATTERNS.add(Pattern.compile(p).pattern());
+            }
+        }
+    }
+
+    static void clear() {
+        PATTERNS.clear();
     }
 
     public static Pattern compile() {
