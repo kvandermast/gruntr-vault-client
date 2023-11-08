@@ -49,6 +49,20 @@ final class CliProperties {
         this.inputFilePath = builder.inputFilePath;
         this.outputFilePath = builder.outputFilePath;
         this.hcToken = builder.hcToken;
+
+        if (null == builder.keys) {
+            EncryptionKeys.register(EncryptionKeys.ALL);
+        } else {
+            var result = builder.keys.split(",");
+
+            for (String pattern : result) {
+                if (pattern.trim().equalsIgnoreCase(":secrets")) {
+                    EncryptionKeys.register(EncryptionKeys.SECRETS);
+                } else {
+                    EncryptionKeys.register(pattern);
+                }
+            }
+        }
     }
 
     static Builder builder() {
@@ -89,6 +103,7 @@ final class CliProperties {
         private String hcServer;
         private String hcTransitPath;
         private String hcTransitKeyName;
+        private String keys;
 
         Builder() {
             //no-op
@@ -163,6 +178,9 @@ final class CliProperties {
                             break;
                         case OUTPUT_FILE:
                             this.outputFilePath = Paths.get(this.params.remove());
+                            break;
+                        case KEYS:
+                            this.keys = this.params.remove();
                             break;
                         case HC_VAULT_TOKEN:
                             this.hcToken = VaultToken.of(this.params.remove());

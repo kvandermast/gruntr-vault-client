@@ -24,6 +24,7 @@ import static java.util.Objects.requireNonNull;
 enum CliParameterName {
     INPUT_FILE("--input", "-i"),
     OUTPUT_FILE("--output", "-o"),
+    KEYS("--keys", "-k"),
     HC_VAULT_TOKEN("--hc-token", "-t", "--token"),
     HC_VAULT_HOST("--hc-vault-server", "-h"),
     HC_VAULT_TRANSIT_PATH("--hc-transit-path"),
