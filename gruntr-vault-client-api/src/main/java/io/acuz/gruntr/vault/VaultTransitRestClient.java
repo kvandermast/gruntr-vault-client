@@ -22,6 +22,7 @@ import io.acuz.gruntr.vault.model.VaultToken;
 
 import java.net.URL;
 import java.util.Objects;
+import java.util.Properties;
 
 public interface VaultTransitRestClient {
     static VaultTransitRestClientImpl.Builder builder() {
@@ -34,11 +35,12 @@ public interface VaultTransitRestClient {
 
     char[] rewrap(char[] value) throws VaultException;
 
+    Properties decrypt(Properties properties) throws VaultException;
+
     final class Builder {
         URL host;
         VaultToken token;
         String transitPath;
-
         String transitKeyName;
 
         public VaultTransitRestClient build() {

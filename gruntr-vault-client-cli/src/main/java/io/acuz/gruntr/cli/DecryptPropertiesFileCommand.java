@@ -22,12 +22,9 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Objects;
 
-final class DecryptPropertiesFileCommand implements Command {
-    private final CliProperties properties;
-
-
+final class DecryptPropertiesFileCommand extends AbstractCommand implements Command {
     private DecryptPropertiesFileCommand(Builder builder) {
-        this.properties = builder.properties;
+        super(builder.properties);
     }
 
 
@@ -43,12 +40,11 @@ final class DecryptPropertiesFileCommand implements Command {
                 .build();
 
         var decryptedProperties = client.decryptProperties();
+
         try {
-            if (null == properties.getOutputFilePath()) {
-                decryptedProperties.store(System.out, "");
-            }
+            storeProperties(decryptedProperties, false);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 

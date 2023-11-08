@@ -42,10 +42,16 @@ abstract class AbstractCommand {
     }
 
     protected void storeProperties(final Properties encryptedProperties) throws IOException {
-        encryptedProperties.put("gruntr__vault_host", this.properties.getHcServer().toExternalForm());
-        encryptedProperties.put("gruntr__vault_transit_path", this.properties.getHcTransitPath());
-        encryptedProperties.put("gruntr__vault_transit_key", this.properties.getHcTransitKeyName());
-        encryptedProperties.put("gruntr__sha3", String.copyValueOf(createHash()));
+        this.storeProperties(encryptedProperties, true);
+    }
+
+    protected void storeProperties(final Properties encryptedProperties, boolean flushGruntrData) throws IOException {
+        if (flushGruntrData) {
+            encryptedProperties.put("gruntr__vault_host", this.properties.getHcServer().toExternalForm());
+            encryptedProperties.put("gruntr__vault_transit_path", this.properties.getHcTransitPath());
+            encryptedProperties.put("gruntr__vault_transit_key", this.properties.getHcTransitKeyName());
+            encryptedProperties.put("gruntr__sha3", String.copyValueOf(createHash()));
+        }
 
         if (null == properties.getOutputFilePath()) {
             encryptedProperties.store(System.out, "");

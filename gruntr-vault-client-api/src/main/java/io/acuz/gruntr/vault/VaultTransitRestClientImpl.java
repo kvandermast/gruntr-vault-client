@@ -20,16 +20,23 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.acuz.gruntr.util.ArrayUtils;
+import io.acuz.gruntr.util.DigestUtils;
 import io.acuz.gruntr.vault.exception.VaultException;
 import io.acuz.gruntr.vault.model.VaultToken;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
+import java.util.Properties;
 
 public final class VaultTransitRestClientImpl implements VaultTransitRestClient {
     private static final String JSON_DATA_FIELD = "data";
@@ -124,5 +131,50 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
         } catch (IOException | InterruptedException e) {
             throw new VaultException("Unable to communicate with Vault", e);
         }
+    }
+
+    @Override
+    public Properties decrypt(Properties properties) throws VaultException {
+        String vaultTransitKey = properties.getProperty("gruntr__vault_transit_key");
+        String vaultHost = properties.getProperty("gruntr__vault_host");
+        String vaultTransitPath = properties.getProperty("gruntr__vault_transit_path");
+        String gruntrSha3Value = properties.getProperty("gruntr__sha3");
+
+        Objects.requireNonNull(gruntrSha3Value);
+
+        try {
+            var sha3HexValue = this.decrypt(gruntrSha3Value.toCharArray());
+            var recomputedSha3HexValue = ArrayUtils.toCharArray(DigestUtils.sha3digest(vaultHost, vaultTransitPath, vaultTransitKey));
+
+            if (!Arrays.equals(sha3HexValue, recomputedSha3HexValue)) {
+                throw new IllegalStateException("Hash validation failed, gruntr__ values were tampered with?");
+            }
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
+        var decryptedProperties = new Properties();
+
+        properties.forEach((key, val) -> {
+            if (val instanceof String) {
+                var stringValue = ((String) val).trim();
+                var keyName = (String) key;
+
+                if (!keyName.toLowerCase().startsWith("gruntr__")) {
+                    if (stringValue.startsWith("vault:")) {
+                        try {
+                            decryptedProperties.put(key, String.copyValueOf(decrypt(stringValue.toCharArray())));
+                        } catch (VaultException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        // non-encrypted value
+                        decryptedProperties.put(key, val);
+                    }
+                }
+            }
+        });
+
+        return decryptedProperties;
     }
 }
