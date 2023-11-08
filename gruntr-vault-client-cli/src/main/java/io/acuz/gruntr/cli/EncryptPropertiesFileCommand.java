@@ -35,12 +35,12 @@ final class EncryptPropertiesFileCommand extends AbstractCommand implements Comm
 
     @Override
     public void run() {
-        try (var fileInputStream = new FileInputStream(this.properties.getInputFilePath().toFile())) {
-            var vaultClient = createClient();
+        try (var fileInputStream = new FileInputStream(this.cliProperties.getInputFilePath().toFile())) {
 
             var originalProperties = new Properties();
             originalProperties.load(fileInputStream);
 
+            var vaultClient = createClient(originalProperties);
             storeProperties(vaultClient.encrypt(originalProperties));
         } catch (IOException | VaultException e) {
             throw new IllegalStateException(e);

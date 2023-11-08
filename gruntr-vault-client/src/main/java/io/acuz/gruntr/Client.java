@@ -19,6 +19,11 @@ package io.acuz.gruntr;
 import java.util.Properties;
 
 public interface Client {
+    String GRUNTR__VAULT_TRANSIT_KEY = "gruntr__vault_transit_key";
+    String GRUNTR__VAULT_HOST = "gruntr__vault_host";
+    String GRUNTR__VAULT_TRANSIT_PATH = "gruntr__vault_transit_path";
+    String GRUNTR__SHA_3 = "gruntr__sha3";
+
     Properties decryptProperties();
 
     Properties getEncryptedProperties();

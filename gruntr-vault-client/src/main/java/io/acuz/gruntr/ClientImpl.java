@@ -29,10 +29,6 @@ import java.util.Objects;
 import java.util.Properties;
 
 public final class ClientImpl implements Client {
-    private static final String GRUNTR__VAULT_TRANSIT_KEY = "gruntr__vault_transit_key";
-    private static final String GRUNTR__VAULT_HOST = "gruntr__vault_host";
-    private static final String GRUNTR__VAULT_TRANSIT_PATH = "gruntr__vault_transit_path";
-    private static final String GRUNTR__SHA_3 = "gruntr__sha3";
     private final Path path;
 
     private final VaultToken token;

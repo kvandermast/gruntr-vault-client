@@ -35,8 +35,8 @@ final class DecryptPropertiesFileCommand extends AbstractCommand implements Comm
     @Override
     public void run() {
         var client = ClientImpl.builder()
-                .setPath(this.properties.getInputFilePath())
-                .setToken(this.properties.getHcToken())
+                .setPath(this.cliProperties.getInputFilePath())
+                .setToken(this.cliProperties.getHcToken())
                 .build();
 
         try {

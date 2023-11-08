@@ -34,12 +34,14 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Objects;
 import java.util.Properties;
 
 public final class VaultTransitRestClientImpl implements VaultTransitRestClient {
+    public static final String GRUNTR__VAULT_TRANSIT_KEY = "gruntr__vault_transit_key";
+    public static final String GRUNTR__VAULT_HOST = "gruntr__vault_host";
+    public static final String GRUNTR__VAULT_TRANSIT_PATH = "gruntr__vault_transit_path";
+    public static final String GRUNTR__SHA_3 = "gruntr__sha3";
     private static final String JSON_DATA_FIELD = "data";
-
     @SuppressWarnings("UastIncorrectHttpHeaderInspection")
     private static final String HEADER_X_VAULT_TOKEN = "X-Vault-Token";
     private static final String HEADER_ACCEPT = "Accept";
@@ -134,23 +136,7 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
 
     @Override
     public Properties decrypt(Properties properties) throws VaultException {
-        String vaultTransitKey = properties.getProperty("gruntr__vault_transit_key");
-        String vaultHost = properties.getProperty("gruntr__vault_host");
-        String vaultTransitPath = properties.getProperty("gruntr__vault_transit_path");
-        String gruntrSha3Value = properties.getProperty("gruntr__sha3");
-
-        Objects.requireNonNull(gruntrSha3Value);
-
-        try {
-            var sha3HexValue = this.decrypt(gruntrSha3Value.toCharArray());
-            var recomputedSha3HexValue = ArrayUtils.toCharArray(DigestUtils.sha3digest(vaultHost, vaultTransitPath, vaultTransitKey));
-
-            if (!Arrays.equals(sha3HexValue, recomputedSha3HexValue)) {
-                throw new IllegalStateException("Hash validation failed, gruntr__ values were tampered with?");
-            }
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        validateGruntrSha(properties);
 
         var decryptedProperties = new Properties();
 
@@ -201,12 +187,11 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
         return encryptedProperties;
     }
 
-    @Override
-    public Properties rewrap(Properties properties) throws VaultException {
-        String vaultTransitKey = properties.getProperty("gruntr__vault_transit_key");
-        String vaultHost = properties.getProperty("gruntr__vault_host");
-        String vaultTransitPath = properties.getProperty("gruntr__vault_transit_path");
-        String gruntrSha3Value = properties.getProperty("gruntr__sha3");
+    private void validateGruntrSha(Properties properties) throws VaultException {
+        String vaultTransitKey = properties.getProperty(GRUNTR__VAULT_TRANSIT_KEY);
+        String vaultHost = properties.getProperty(GRUNTR__VAULT_HOST);
+        String vaultTransitPath = properties.getProperty(GRUNTR__VAULT_TRANSIT_PATH);
+        String gruntrSha3Value = properties.getProperty(GRUNTR__SHA_3);
 
         try {
             var sha3HexValue = this.decrypt(gruntrSha3Value.toCharArray());
@@ -218,6 +203,11 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public Properties rewrap(Properties properties) throws VaultException {
+        validateGruntrSha(properties);
 
         var encryptedProperties = new Properties();
 

@@ -16,7 +16,6 @@
 
 package io.acuz.gruntr.cli;
 
-import io.acuz.gruntr.vault.VaultTransitRestClient;
 import io.acuz.gruntr.vault.exception.VaultException;
 
 import java.io.FileInputStream;
@@ -37,17 +36,12 @@ final class RewrapPropertiesFileCommand extends AbstractCommand implements Comma
 
     @Override
     public void run() {
-        try (var fileInputStream = new FileInputStream(this.properties.getInputFilePath().toFile())) {
-            var client = VaultTransitRestClient.builder()
-                    .host(this.properties.getHcServer())
-                    .token(this.properties.getHcToken())
-                    .transitPath(this.properties.getHcTransitPath())
-                    .transitKeyName(this.properties.getHcTransitKeyName())
-                    .build();
+        try (var fileInputStream = new FileInputStream(this.cliProperties.getInputFilePath().toFile())) {
 
             var properties = new Properties();
             properties.load(fileInputStream);
 
+            var client = createClient(properties);
             storeProperties(client.rewrap(properties));
         } catch (IOException | VaultException e) {
             throw new IllegalStateException(e);
