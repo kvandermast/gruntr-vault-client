@@ -52,8 +52,6 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
 
         this.transitPath = builder.transitPath;
         this.transitKeyName = builder.transitKeyName;
-
-        builder.token.invalidate();
     }
 
     @Override

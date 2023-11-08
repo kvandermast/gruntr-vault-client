@@ -16,10 +16,13 @@
 
 package io.acuz.gruntr.cli;
 
+import io.acuz.gruntr.util.DigestUtils;
 import io.acuz.gruntr.vault.VaultTransitRestClient;
+import io.acuz.gruntr.vault.exception.VaultException;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
 abstract class AbstractCommand {
@@ -42,7 +45,7 @@ abstract class AbstractCommand {
         encryptedProperties.put("gruntr__vault_host", this.properties.getHcServer().toExternalForm());
         encryptedProperties.put("gruntr__vault_transit_path", this.properties.getHcTransitPath());
         encryptedProperties.put("gruntr__vault_transit_key", this.properties.getHcTransitKeyName());
-
+        encryptedProperties.put("gruntr__sha3", String.copyValueOf(createHash()));
 
         if (null == properties.getOutputFilePath()) {
             encryptedProperties.store(System.out, "");
@@ -55,6 +58,19 @@ abstract class AbstractCommand {
             } else {
                 encryptedProperties.store(new FileOutputStream(path), "");
             }
+        }
+    }
+
+    private char[] createHash() {
+        try {
+            return createClient().encrypt(
+                    DigestUtils.sha3digest(
+                            this.properties.getHcServer().toExternalForm(),
+                            this.properties.getHcTransitPath(),
+                            this.properties.getHcTransitKeyName())
+            );
+        } catch (VaultException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
     }
 }
