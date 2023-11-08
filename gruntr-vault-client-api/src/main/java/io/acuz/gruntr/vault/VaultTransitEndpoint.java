@@ -19,15 +19,20 @@ package io.acuz.gruntr.vault;
 import java.net.URI;
 import java.net.URL;
 
+
 enum VaultTransitEndpoint {
-    ENCRYPT("encrypt"),
-    DECRYPT("decrypt"),
-    REWRAP("rewrap");
+    DECRYPT("decrypt", "ciphertext", "plaintext"),
+    ENCRYPT("encrypt", "plaintext", "ciphertext"),
+    REWRAP("rewrap", "ciphertext", "ciphertext");
 
     private final String action;
+    private final String inputFieldName;
+    private final String outputFieldName;
 
-    VaultTransitEndpoint(String action) {
+    VaultTransitEndpoint(String action, String inputFieldName, String outputFieldName) {
         this.action = action;
+        this.inputFieldName = inputFieldName;
+        this.outputFieldName = outputFieldName;
     }
 
     public URI from(URL host, String mountPath, String keyName) {
@@ -39,5 +44,13 @@ enum VaultTransitEndpoint {
                         keyName
                 )
         );
+    }
+
+    public String getInputFieldName() {
+        return inputFieldName;
+    }
+
+    public String getOutputFieldName() {
+        return outputFieldName;
     }
 }

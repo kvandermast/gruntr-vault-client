@@ -33,8 +33,7 @@ import java.util.Base64;
 
 public final class VaultTransitRestClientImpl implements VaultTransitRestClient {
     private static final String JSON_DATA_FIELD = "data";
-    private static final String JSON_PLAINTEXT_FIELD = "plaintext";
-    private static final String JSON_CIPHERTEXT_FIELD = "ciphertext";
+
     @SuppressWarnings("UastIncorrectHttpHeaderInspection")
     private static final String HEADER_X_VAULT_TOKEN = "X-Vault-Token";
     private static final String HEADER_ACCEPT = "Accept";
@@ -86,8 +85,8 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
     }
 
     private char[] request(VaultTransitEndpoint endpoint, char[] value) throws VaultException {
-        var inputFieldName = endpoint == VaultTransitEndpoint.ENCRYPT ? JSON_PLAINTEXT_FIELD : JSON_CIPHERTEXT_FIELD;
-        var outputFieldName = endpoint == VaultTransitEndpoint.DECRYPT ? JSON_PLAINTEXT_FIELD : JSON_CIPHERTEXT_FIELD;
+        var inputFieldName = endpoint.getInputFieldName();
+        var outputFieldName = endpoint.getOutputFieldName();
 
         var httpClient = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NEVER)
