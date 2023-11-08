@@ -16,15 +16,11 @@
 
 package io.acuz.gruntr.cli;
 
-import io.acuz.gruntr.vault.VaultTransitRestClient;
-import io.acuz.gruntr.vault.exception.VaultException;
+import io.acuz.gruntr.Client;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.Objects;
-import java.util.Properties;
 
 final class DecryptPropertiesFileCommand implements Command {
     private final CliProperties properties;
@@ -41,48 +37,18 @@ final class DecryptPropertiesFileCommand implements Command {
 
     @Override
     public void run() {
-        try (var fileInputStream = new FileInputStream(this.properties.getInputFilePath().toFile())) {
-            var originalProperties = new Properties();
-            originalProperties.load(fileInputStream);
+        var client = Client.builder()
+                .setPath(this.properties.getInputFilePath())
+                .setToken(this.properties.getHcToken())
+                .build();
 
-            String vaultTransitKey = originalProperties.getProperty("gruntr__vault_transit_key");
-            String vaultHost = originalProperties.getProperty("gruntr__vault_host");
-            String vaultTransitPath = originalProperties.getProperty("gruntr__vault_transit_path");
-
-            if (!this.properties.getHcTransitKeyName().equals(vaultTransitKey)
-                    || !this.properties.getHcServer().toExternalForm().equals(vaultHost)
-                    || !this.properties.getHcTransitPath().equals(vaultTransitPath)) {
-                throw new IllegalStateException("Configuration mismatch");
-            }
-
-            var vaultClient = VaultTransitRestClient.builder()
-                    .host(URI.create(vaultHost).toURL())
-                    .token(this.properties.getHcToken())
-                    .transitPath(vaultTransitPath)
-                    .transitKeyName(vaultTransitKey)
-                    .build();
-
-            var encryptedProperties = new Properties();
-
-            originalProperties.forEach((key, value) -> {
-                var kn = (String) key;
-
-                if (!kn.toLowerCase().startsWith("gruntr__")) {
-                    try {
-                        encryptedProperties.put(
-                                key,
-                                String.copyValueOf(vaultClient.decrypt(((String) value).toCharArray())));
-                    } catch (VaultException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
-
+        var decryptedProperties = client.getDecryptedProperties();
+        try {
             if (null == properties.getOutputFilePath()) {
-                encryptedProperties.store(System.out, "");
+                decryptedProperties.store(System.out, "");
             }
         } catch (IOException e) {
-            throw new IllegalStateException(e);
+            throw new RuntimeException(e);
         }
     }
 

@@ -16,6 +16,8 @@
 
 package io.acuz.gruntr;
 
+import io.acuz.gruntr.util.ArrayUtils;
+import io.acuz.gruntr.util.DigestUtils;
 import io.acuz.gruntr.vault.VaultTransitRestClient;
 import io.acuz.gruntr.vault.exception.VaultException;
 import io.acuz.gruntr.vault.model.VaultToken;
@@ -25,6 +27,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -69,40 +73,50 @@ public final class Client {
         String vaultTransitKey = originalProperties.getProperty("gruntr__vault_transit_key");
         String vaultHost = originalProperties.getProperty("gruntr__vault_host");
         String vaultTransitPath = originalProperties.getProperty("gruntr__vault_transit_path");
+        String gruntrSha3Value = originalProperties.getProperty("gruntr__sha3");
 
+        Objects.requireNonNull(gruntrSha3Value);
 
-        VaultTransitRestClient vault;
+        VaultTransitRestClient vaultTransitRestClient;
         try {
-            vault = VaultTransitRestClient.builder()
+            vaultTransitRestClient = VaultTransitRestClient.builder()
                     .host(URI.create(vaultHost).toURL())
                     .token(token)
                     .transitPath(vaultTransitPath)
                     .transitKeyName(vaultTransitKey)
                     .build();
-        } catch (MalformedURLException e) {
+
+            var sha3HexValue = vaultTransitRestClient.decrypt(gruntrSha3Value.toCharArray());
+            var recomputedSha3HexValue = ArrayUtils.toCharArray(DigestUtils.sha3digest(vaultHost, vaultTransitPath, vaultTransitKey));
+
+            if (!Arrays.equals(sha3HexValue, recomputedSha3HexValue)) {
+                throw new IllegalStateException("Hash validation failed, gruntr__ values were tampered with?");
+            }
+        } catch (MalformedURLException | VaultException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
 
         var properties = new Properties();
 
-
         originalProperties.forEach((key, val) -> {
             if (val instanceof String) {
                 var stringValue = ((String) val).trim();
+                var keyName = (String) key;
 
-                if (stringValue.startsWith("vault:")) {
-                    try {
-                        properties.put(key, String.copyValueOf(vault.decrypt(stringValue.toCharArray())));
-                    } catch (VaultException e) {
-                        throw new RuntimeException(e);
+                if (!keyName.startsWith("gruntr__")) {
+                    if (stringValue.startsWith("vault:")) {
+                        try {
+                            properties.put(key, String.copyValueOf(vaultTransitRestClient.decrypt(stringValue.toCharArray())));
+                        } catch (VaultException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        // non-encrypted value
+                        properties.put(key, val);
                     }
-                } else if (!((String) key).startsWith("gruntr__")) {
-                    // non-encrypted value
-                    properties.put(key, val);
                 }
             }
         });
-
 
         return properties;
     }

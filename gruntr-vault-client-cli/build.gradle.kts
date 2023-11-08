@@ -26,6 +26,7 @@ val junitVersion: String by project
 
 dependencies {
     implementation(project(":gruntr-vault-client-api"))
+    implementation(project(":gruntr-vault-client"))
 
     testImplementation(platform("org.junit:junit-bom:${junitVersion}"))
     testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
