@@ -64,12 +64,14 @@ This generates an output to stdout, alike:
 
 ```properties
 #
-#Thu Nov 02 16:25:32 CET 2023
-my.secret=vault\:v1\:628GeWoFhb+5xOx2RDYuNK6BEaxRopnYJo+qkfiHUmK60giGXxmRo59mpd7F9cjSvg\=\=
-yet.another.secret=vault\:v1\:C3JPohIciC1fZ9tjXLBkMH8JgH++z07WiFDGBP/Rj548es0cc6Lnt46kz70\=
+#Wed Nov 08 20:25:09 CET 2023
+yet.another.secret=vault\:v1\:b14ofszZ1QMD43W9++r8D+ngOuHjkmJfObIBjXeLply3rCnm0KDdK5QUTts\=
+just.plaintext=this is just plaintext
+my.secret=vault\:v1\:Qq8SSW0iOt2JG6+fpKOwD4Xeld1PaR7IwesGyTi0qkefnqX84QL4TJbapIDcwsEE4A\=\=
 gruntr__vault_transit_path=transit/project_name
 gruntr__vault_transit_key=appkey
 gruntr__vault_host=http\://vault\:8201
+gruntr__sha3=vault\:v1\:x/zxPO5Pbazxpr4LfdarLD/JX6KPMv2Lr3uzHmOibZh/VW/qKyUhhisSYGOAR4MIv4QyuvbbHLx2+YTL12JJK2KkcUsmBzjVFHjznW8VjIZ/4uvQDwqvrOKfl/w\=
 ```
 
 The file contains correctly encoded values for a properties file.
@@ -101,7 +103,8 @@ This will decrypt the file against the defined Transit engine to
 
 ```properties
 #
-#Thu Nov 02 17:02:27 CET 2023
+#Wed Nov 08 20:25:28 CET 2023
+just.plaintext=this is just plaintext
 yet.another.secret=more secret even
 my.secret=something very secret
 ```
@@ -126,12 +129,14 @@ Give the following encrypted properties file:
 
 ```properties
 #
-#Thu Nov 02 16:25:32 CET 2023
-my.secret=vault\:v1\:628GeWoFhb+5xOx2RDYuNK6BEaxRopnYJo+qkfiHUmK60giGXxmRo59mpd7F9cjSvg\=\=
-yet.another.secret=vault\:v1\:C3JPohIciC1fZ9tjXLBkMH8JgH++z07WiFDGBP/Rj548es0cc6Lnt46kz70\=
+#Wed Nov 08 20:25:39 CET 2023
+yet.another.secret=vault\:v1\:cSYGP5EaLQoGScGlwWRxuQYoXA59jSp8dnGxizy8nRluSd9jQca0ZhpvvRw\=
+just.plaintext=this is just plaintext
+my.secret=vault\:v1\:zVZiN399LBQwbulteZ9Uu0O9g+GHuE7VjostpBnD2pC0jwSuiwtQx1DSUvdZTpfGRA\=\=
 gruntr__vault_transit_path=transit/project_name
 gruntr__vault_transit_key=appkey
 gruntr__vault_host=http\://vault\:8201
+gruntr__sha3=vault\:v1\:CkaExD0+Cph+BmByIh440bXYKrXUua4tGT2X4r2viUiJNCQvnfxQWI1NHO9i0A7lYdGgg9Dc0TmsbaAhKJ2U1mW/N87B/838DD3MTUB+qigRJw+XeBhslOY+MUU\=
 ```
 
 Give the example above, you run the CLI with the following parameters:
@@ -150,12 +155,14 @@ Would upgrade the version of the encrypted values:
 
 ```properties
 #
-#Mon Nov 06 15:01:52 CET 2023
-yet.another.secret=vault\:v2\:CtCylZ9QYnLioefOxPeytEyE5obOjFLlYWhH6FY/kIw/dODgr6G3WZjD6LU\=
-my.secret=vault\:v2\:mLVx9xS2vWyKoN0lnAbSoakaLQk3ZsuXaqkM3EmSOxHAsms1dsz5wR31XX2z4qUhew\=\=
+#Wed Nov 08 20:37:41 CET 2023
+yet.another.secret=vault\:v2\:TxvjKocwGbNHixxyjqOALfmreVwgE50X5cpmtaCtzZeOumiEl8I+fPA+fUw\=
+just.plaintext=this is just plaintext
+my.secret=vault\:v2\:/Zb9e6ty/e2sqWOlEHo210nl4BW5gUCgS32Hm2STllzFYZMjp+4pmRLN18qURBdL/A\=\=
 gruntr__vault_transit_path=transit/project_name
 gruntr__vault_transit_key=appkey
 gruntr__vault_host=http\://vault\:8201
+gruntr__sha3=vault\:v2\:Be6v4lO6remiLkYSIKuhR0QZv3PrMmFInB6fnM2/sdJA7soyfkLA2lXVW8jQUxBbwH1kwtmZZsXDmF0G42BEutaq3JVymdnuRZeWiHFzbl+INQymQ02af1PJMuE\=
 ```
 
 ## Using the client
@@ -177,6 +184,7 @@ class ClientTest {
     @Test
     void test_createANewClientAndDecrypt() {
         var client = Client.builder()
+                .setToken(VaultToken.of("TOKEN"))
                 .setPath(Path.of("/to/your/path", "application-encrypted.properties"))
                 .build();
 
