@@ -19,6 +19,7 @@ package io.acuz.gruntr.vault;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.acuz.gruntr.cli.EncryptionKeys;
 import io.acuz.gruntr.util.ArrayUtils;
 import io.acuz.gruntr.util.DigestUtils;
 import io.acuz.gruntr.vault.exception.VaultException;
@@ -174,5 +175,29 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
         });
 
         return decryptedProperties;
+    }
+
+    @Override
+    public Properties encrypt(Properties properties) throws VaultException {
+        var keysToEncrypt = EncryptionKeys.compile();
+        var encryptedProperties = new Properties();
+
+        properties.forEach((key, value) -> {
+            try {
+                // the property key matches the keys required to be encrypted
+                if (keysToEncrypt.matcher((String) key).find()) {
+                    encryptedProperties.put(
+                            key,
+                            String.copyValueOf(encrypt(((String) value).getBytes())));
+                } else {
+                    // there is no need to encrypt this key
+                    encryptedProperties.put(key, value);
+                }
+            } catch (VaultException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return encryptedProperties;
     }
 }

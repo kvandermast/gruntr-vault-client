@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-final class EncryptionKeys {
+public final class EncryptionKeys {
     public static final String ALL = ".*";
     public static final String SECRETS = "(secret|token|password)";
     private static final List<String> PATTERNS = Collections.synchronizedList(new ArrayList<>());

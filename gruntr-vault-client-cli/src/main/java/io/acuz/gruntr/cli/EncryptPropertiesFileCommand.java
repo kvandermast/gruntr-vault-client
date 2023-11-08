@@ -39,29 +39,10 @@ final class EncryptPropertiesFileCommand extends AbstractCommand implements Comm
             var vaultClient = createClient();
 
             var originalProperties = new Properties();
-            var encryptedProperties = new Properties();
-            var keysToEncrypt = EncryptionKeys.compile();
-
             originalProperties.load(fileInputStream);
-            originalProperties.forEach((key, value) -> {
-                try {
-                    // the property key matches the keys required to be encrypted
-                    if (keysToEncrypt.matcher((String) key).find()) {
-                        encryptedProperties.put(
-                                key,
-                                String.copyValueOf(vaultClient.encrypt(((String) value).getBytes())));
-                    } else {
-                        // there is no need to encrypt this key
-                        encryptedProperties.put(key, value);
-                    }
-                } catch (VaultException e) {
-                    throw new RuntimeException(e);
-                }
-            });
 
-
-            storeProperties(encryptedProperties);
-        } catch (IOException e) {
+            storeProperties(vaultClient.encrypt(originalProperties));
+        } catch (IOException | VaultException e) {
             throw new IllegalStateException(e);
         }
     }

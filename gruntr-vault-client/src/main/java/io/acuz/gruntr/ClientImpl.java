@@ -29,6 +29,10 @@ import java.util.Objects;
 import java.util.Properties;
 
 public final class ClientImpl implements Client {
+    private static final String GRUNTR__VAULT_TRANSIT_KEY = "gruntr__vault_transit_key";
+    private static final String GRUNTR__VAULT_HOST = "gruntr__vault_host";
+    private static final String GRUNTR__VAULT_TRANSIT_PATH = "gruntr__vault_transit_path";
+    private static final String GRUNTR__SHA_3 = "gruntr__sha3";
     private final Path path;
 
     private final VaultToken token;
@@ -67,10 +71,10 @@ public final class ClientImpl implements Client {
     public Properties decryptProperties() {
         var originalProperties = this.getEncryptedProperties();
 
-        String vaultTransitKey = originalProperties.getProperty("gruntr__vault_transit_key");
-        String vaultHost = originalProperties.getProperty("gruntr__vault_host");
-        String vaultTransitPath = originalProperties.getProperty("gruntr__vault_transit_path");
-        String gruntrSha3Value = originalProperties.getProperty("gruntr__sha3");
+        String vaultTransitKey = originalProperties.getProperty(GRUNTR__VAULT_TRANSIT_KEY);
+        String vaultHost = originalProperties.getProperty(GRUNTR__VAULT_HOST);
+        String vaultTransitPath = originalProperties.getProperty(GRUNTR__VAULT_TRANSIT_PATH);
+        String gruntrSha3Value = originalProperties.getProperty(GRUNTR__SHA_3);
 
         Objects.requireNonNull(gruntrSha3Value);
 

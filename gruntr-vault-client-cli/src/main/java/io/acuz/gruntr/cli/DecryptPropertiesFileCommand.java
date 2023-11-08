@@ -39,17 +39,14 @@ final class DecryptPropertiesFileCommand extends AbstractCommand implements Comm
                 .setToken(this.properties.getHcToken())
                 .build();
 
-        var decryptedProperties = client.decryptProperties();
-
         try {
-            storeProperties(decryptedProperties, false);
+            storeProperties(client.decryptProperties(), false);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
 
     static final class Builder {
-
         private CliProperties properties;
 
         public Builder parameters(ArrayDeque<String> params) {
@@ -60,7 +57,7 @@ final class DecryptPropertiesFileCommand extends AbstractCommand implements Comm
             return this;
         }
 
-        public DecryptPropertiesFileCommand build() {
+         public DecryptPropertiesFileCommand build() {
             validate();
             return new DecryptPropertiesFileCommand(this);
         }
