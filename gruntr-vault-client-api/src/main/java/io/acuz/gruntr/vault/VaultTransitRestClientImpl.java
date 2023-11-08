@@ -200,4 +200,53 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
 
         return encryptedProperties;
     }
+
+    @Override
+    public Properties rewrap(Properties properties) throws VaultException {
+        String vaultTransitKey = properties.getProperty("gruntr__vault_transit_key");
+        String vaultHost = properties.getProperty("gruntr__vault_host");
+        String vaultTransitPath = properties.getProperty("gruntr__vault_transit_path");
+        String gruntrSha3Value = properties.getProperty("gruntr__sha3");
+
+        try {
+            var sha3HexValue = this.decrypt(gruntrSha3Value.toCharArray());
+            var recomputedSha3HexValue = ArrayUtils.toCharArray(DigestUtils.sha3digest(vaultHost, vaultTransitPath, vaultTransitKey));
+
+            if (!Arrays.equals(sha3HexValue, recomputedSha3HexValue)) {
+                throw new IllegalStateException("Hash validation failed, gruntr__ values were tampered with?");
+            }
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
+        var encryptedProperties = new Properties();
+
+        properties.forEach((key, val) -> {
+            var stringValue = ((String) val).trim();
+            var keyName = (String) key;
+
+            if (!keyName.toLowerCase().startsWith("gruntr__")) {
+                if (stringValue.startsWith("vault:")) {
+                    try {
+                        encryptedProperties.put(
+                                key,
+                                String.copyValueOf(
+                                        rewrap(
+                                                stringValue.toCharArray()
+                                        )
+                                )
+                        );
+                    } catch (VaultException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    encryptedProperties.put(key, stringValue);
+                }
+            } else {
+                encryptedProperties.put(key, stringValue);
+            }
+        });
+
+        return encryptedProperties;
+    }
 }

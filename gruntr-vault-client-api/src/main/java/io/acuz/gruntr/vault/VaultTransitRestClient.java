@@ -39,6 +39,8 @@ public interface VaultTransitRestClient {
 
     Properties encrypt(Properties properties) throws VaultException;
 
+    Properties rewrap(Properties properties) throws VaultException;
+
     final class Builder {
         URL host;
         VaultToken token;
