@@ -46,6 +46,7 @@ Give the following unencrypted properties file:
 
 ```properties
 my.secret=something very secret
+just.plaintext=this is just plaintext
 yet.another.secret=more secret even
 ```
 
@@ -65,9 +66,9 @@ This generates an output to stdout, alike:
 ```properties
 #
 #Wed Nov 08 20:25:09 CET 2023
-yet.another.secret=vault\:v1\:b14ofszZ1QMD43W9++r8D+ngOuHjkmJfObIBjXeLply3rCnm0KDdK5QUTts\=
-just.plaintext=this is just plaintext
 my.secret=vault\:v1\:Qq8SSW0iOt2JG6+fpKOwD4Xeld1PaR7IwesGyTi0qkefnqX84QL4TJbapIDcwsEE4A\=\=
+just.plaintext=vault\:v1\:0dj5IDB0vFHq9KcsX6FGF9QXl+yvvBpCGTy5oSd+kj24olMmQh3lgUt9aTg6Fq1T1iE\=
+yet.another.secret=vault\:v1\:b14ofszZ1QMD43W9++r8D+ngOuHjkmJfObIBjXeLply3rCnm0KDdK5QUTts\=
 gruntr__vault_transit_path=transit/project_name
 gruntr__vault_transit_key=appkey
 gruntr__vault_host=http\://vault\:8201
@@ -104,9 +105,9 @@ This will decrypt the file against the defined Transit engine to
 ```properties
 #
 #Wed Nov 08 20:25:28 CET 2023
+my.secret=something very secret
 just.plaintext=this is just plaintext
 yet.another.secret=more secret even
-my.secret=something very secret
 ```
 
 ### Re-wrapping
@@ -130,9 +131,9 @@ Give the following encrypted properties file:
 ```properties
 #
 #Wed Nov 08 20:25:39 CET 2023
-yet.another.secret=vault\:v1\:cSYGP5EaLQoGScGlwWRxuQYoXA59jSp8dnGxizy8nRluSd9jQca0ZhpvvRw\=
-just.plaintext=this is just plaintext
 my.secret=vault\:v1\:zVZiN399LBQwbulteZ9Uu0O9g+GHuE7VjostpBnD2pC0jwSuiwtQx1DSUvdZTpfGRA\=\=
+just.plaintext=this is just plaintext
+yet.another.secret=vault\:v1\:cSYGP5EaLQoGScGlwWRxuQYoXA59jSp8dnGxizy8nRluSd9jQca0ZhpvvRw\=
 gruntr__vault_transit_path=transit/project_name
 gruntr__vault_transit_key=appkey
 gruntr__vault_host=http\://vault\:8201
@@ -157,9 +158,9 @@ Would upgrade the version of the encrypted values:
 ```properties
 #
 #Wed Nov 08 20:37:41 CET 2023
-yet.another.secret=vault\:v2\:TxvjKocwGbNHixxyjqOALfmreVwgE50X5cpmtaCtzZeOumiEl8I+fPA+fUw\=
-just.plaintext=this is just plaintext
 my.secret=vault\:v2\:/Zb9e6ty/e2sqWOlEHo210nl4BW5gUCgS32Hm2STllzFYZMjp+4pmRLN18qURBdL/A\=\=
+just.plaintext=this is just plaintext
+yet.another.secret=vault\:v2\:TxvjKocwGbNHixxyjqOALfmreVwgE50X5cpmtaCtzZeOumiEl8I+fPA+fUw\=
 gruntr__vault_transit_path=transit/project_name
 gruntr__vault_transit_key=appkey
 gruntr__vault_host=http\://vault\:8201
