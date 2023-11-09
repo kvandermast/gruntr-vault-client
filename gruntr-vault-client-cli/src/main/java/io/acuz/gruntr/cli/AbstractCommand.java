@@ -16,15 +16,12 @@
 
 package io.acuz.gruntr.cli;
 
-import io.acuz.gruntr.util.DigestUtils;
 import io.acuz.gruntr.vault.VaultTransitRestClient;
-import io.acuz.gruntr.vault.exception.VaultException;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
 import static io.acuz.gruntr.Client.*;
@@ -54,17 +51,6 @@ abstract class AbstractCommand {
     }
 
     protected void storeProperties(final Properties encryptedProperties) throws IOException {
-        this.storeProperties(encryptedProperties, true);
-    }
-
-    protected void storeProperties(final Properties encryptedProperties, boolean flushGruntrData) throws IOException {
-        if (flushGruntrData) {
-            encryptedProperties.put(GRUNTR__VAULT_HOST, this.cliProperties.getHcServer().toExternalForm());
-            encryptedProperties.put(GRUNTR__VAULT_TRANSIT_PATH, this.cliProperties.getHcTransitPath());
-            encryptedProperties.put(GRUNTR__VAULT_TRANSIT_KEY, this.cliProperties.getHcTransitKeyName());
-            encryptedProperties.put(GRUNTR__SHA_3, String.copyValueOf(createHash(encryptedProperties)));
-        }
-
         if (null == cliProperties.getOutputFilePath()) {
             encryptedProperties.store(System.out, "");
         } else {
@@ -79,16 +65,4 @@ abstract class AbstractCommand {
         }
     }
 
-    private char[] createHash(Properties properties) {
-        try {
-            return createClient(properties).encrypt(
-                    DigestUtils.sha3digest(
-                            this.cliProperties.getHcServer().toExternalForm(),
-                            this.cliProperties.getHcTransitPath(),
-                            this.cliProperties.getHcTransitKeyName())
-            );
-        } catch (VaultException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

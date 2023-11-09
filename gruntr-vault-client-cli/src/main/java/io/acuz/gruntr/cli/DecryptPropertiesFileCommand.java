@@ -40,7 +40,7 @@ final class DecryptPropertiesFileCommand extends AbstractCommand implements Comm
                 .build();
 
         try {
-            storeProperties(client.decryptProperties(), false);
+            storeProperties(client.decryptProperties());
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

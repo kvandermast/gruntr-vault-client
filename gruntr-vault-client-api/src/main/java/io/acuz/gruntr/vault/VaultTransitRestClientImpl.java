@@ -39,10 +39,6 @@ import java.util.Properties;
 import static java.util.Objects.requireNonNull;
 
 public final class VaultTransitRestClientImpl implements VaultTransitRestClient {
-    public static final String GRUNTR__VAULT_TRANSIT_KEY = "gruntr__vault_transit_key";
-    public static final String GRUNTR__VAULT_HOST = "gruntr__vault_host";
-    public static final String GRUNTR__VAULT_TRANSIT_PATH = "gruntr__vault_transit_path";
-    public static final String GRUNTR__SHA_3 = "gruntr__sha3";
     private static final String JSON_DATA_FIELD = "data";
     @SuppressWarnings("UastIncorrectHttpHeaderInspection")
     private static final String HEADER_X_VAULT_TOKEN = "X-Vault-Token";
@@ -194,7 +190,16 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
             }
         });
 
+        appendGruntrHash(encryptedProperties);
+
         return encryptedProperties;
+    }
+
+    private void appendGruntrHash(Properties properties) {
+        properties.put(GRUNTR__VAULT_HOST, this.host.toExternalForm());
+        properties.put(GRUNTR__VAULT_TRANSIT_PATH, this.transitPath);
+        properties.put(GRUNTR__VAULT_TRANSIT_KEY, this.transitKeyName);
+        properties.put(GRUNTR__SHA_3, String.copyValueOf(createHash()));
     }
 
     private void validateGruntrSha(Properties properties) throws VaultException {
@@ -211,6 +216,16 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
                 throw new IllegalStateException("Hash validation failed, gruntr__ values were tampered with?");
             }
         } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private char[] createHash() {
+        try {
+            return encrypt(
+                    DigestUtils.sha3digest(host.toExternalForm(), transitPath, transitKeyName)
+            );
+        } catch (VaultException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }

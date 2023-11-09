@@ -169,13 +169,12 @@ class VaultTransitRestClientTest {
 
         properties.put("gruntr__vault_transit_path", "transit");
         throwable = assertThrows(NullPointerException.class, () -> client.decrypt(properties));
-        assertEquals("Cannot validate hash, missing Vault SHA3 value", throwable.getMessage()) ;
-
+        assertEquals("Cannot validate hash, missing Vault SHA3 value", throwable.getMessage());
 
         properties.put("gruntr__sha3", "fake value");
         MOCK_SERVER.enqueue(new MockResponse().setBody(mockBody));
         var illegalStateException = assertThrows(IllegalStateException.class, () -> client.decrypt(properties));
-        assertEquals("Hash validation failed, gruntr__ values were tampered with?", illegalStateException.getMessage()) ;
+        assertEquals("Hash validation failed, gruntr__ values were tampered with?", illegalStateException.getMessage());
 
         MOCK_SERVER.takeRequest(); // dequeue request
     }
@@ -202,6 +201,43 @@ class VaultTransitRestClientTest {
 
         assertEquals("/v1/transit/project_name/decrypt/appkey", MOCK_SERVER.takeRequest().getPath());
         assertEquals("/v1/transit/project_name/decrypt/appkey", MOCK_SERVER.takeRequest().getPath());
+    }
+
+    @Test
+    void testVaultClientEncryptProperties() throws MalformedURLException, InterruptedException, VaultException {
+        var url = URI.create("http://localhost:" + MOCK_SERVER.getPort()).toURL();
+        var mockBody = "{ \"data\": {\"ciphertext\": \"vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==\" } }";
+
+        var client = createClient(url);
+        var properties = new Properties();
+
+        properties.put("my.plaintext", "this is plain text");
+        properties.put("my.secret", "my secret");
+        properties.put("my.password", "my password");
+        properties.put("my.token", "my token");
+
+        // it should encode 4 properties + the hash
+        final var numberOfRequests = 5;
+
+        for (int i = 0; i < numberOfRequests; i++)
+            MOCK_SERVER.enqueue(new MockResponse().setBody(mockBody));
+
+        var encryptedProperties = client.encrypt(properties);
+
+        assertEquals(8, encryptedProperties.size());
+
+        assertEquals("vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==", encryptedProperties.get("my.plaintext"));
+        assertEquals("vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==", encryptedProperties.get("my.secret"));
+        assertEquals("vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==", encryptedProperties.get("my.password"));
+        assertEquals("vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==", encryptedProperties.get("my.token"));
+
+        assertEquals("appkey", encryptedProperties.get(VaultTransitRestClient.GRUNTR__VAULT_TRANSIT_KEY));
+        assertEquals("transit/project_name", encryptedProperties.get(VaultTransitRestClient.GRUNTR__VAULT_TRANSIT_PATH));
+        assertEquals("http://localhost:" + MOCK_SERVER.getPort(), encryptedProperties.get(VaultTransitRestClient.GRUNTR__VAULT_HOST));
+        assertEquals("vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==", encryptedProperties.get(VaultTransitRestClient.GRUNTR__SHA_3));
+
+        for (int i = 0; i < numberOfRequests; i++) //dequeue requests
+            assertEquals("/v1/transit/project_name/encrypt/appkey", MOCK_SERVER.takeRequest().getPath());
     }
 
     private VaultTransitRestClient createClient(URL url) {
