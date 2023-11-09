@@ -25,6 +25,15 @@ public final class DigestUtils {
         //no-op
     }
 
+    /**
+     * Creates a SHA3-256 digest of the provided input parameters. The result is the byte array representation
+     * of a hex string.
+     *
+     * @param value  the value to hash
+     * @param values the list of values (optional) to digest), this will be appended to the 'value' parameter.
+     * @return a byte array representing the hash in hex format
+     * @throws NoSuchAlgorithmException if for some reason you don't have SHA3-256 enabled
+     */
     public static byte[] sha3digest(String value, String... values) throws NoSuchAlgorithmException {
         Objects.requireNonNull(value);
 

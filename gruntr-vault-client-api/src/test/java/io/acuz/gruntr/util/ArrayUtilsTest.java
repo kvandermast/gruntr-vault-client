@@ -19,6 +19,7 @@ package io.acuz.gruntr.util;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ArrayUtilsTest {
     @Test
@@ -27,5 +28,7 @@ class ArrayUtilsTest {
         var chars = ArrayUtils.toCharArray(message.getBytes());
 
         assertEquals(message, String.copyValueOf(chars));
+
+        assertThrows(NullPointerException.class, () -> ArrayUtils.toCharArray(null));
     }
 }

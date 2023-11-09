@@ -16,12 +16,22 @@
 
 package io.acuz.gruntr.util;
 
+import java.util.Objects;
+
 public final class ArrayUtils {
     private ArrayUtils() {
         //no-op
     }
 
+    /**
+     * Facilitator to convert an array of bytes to an array of chars.
+     *
+     * @param bytes the byte array to convert
+     * @return the input bytes to a char array
+     */
     public static char[] toCharArray(byte[] bytes) {
+        Objects.requireNonNull(bytes);
+
         var chars = new char[bytes.length];
 
         for (int i = 0; i < bytes.length; i++) {
