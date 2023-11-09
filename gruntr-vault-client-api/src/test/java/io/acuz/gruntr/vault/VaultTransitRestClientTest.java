@@ -29,12 +29,13 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Base64;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("SpellCheckingInspection")
-class VaultRestClientTest {
+class VaultTransitRestClientTest {
     final static MockWebServer MOCK_SERVER = new MockWebServer();
 
     @BeforeAll
@@ -147,6 +148,62 @@ class VaultRestClientTest {
         MOCK_SERVER.takeRequest(); // remove from the queue
     }
 
+    @Test
+    void testVaultClientDecryptPropertiesFailsOnShaVerification() throws MalformedURLException, InterruptedException {
+        var url = URI.create("http://localhost:" + MOCK_SERVER.getPort()).toURL();
+        var mockBody = "{ \"data\": {\"plaintext\": \"NDEyZTU1NWZjYmZjNDNmMmUxYWIyZWQzZDNiM2JmNWNjMDIwZGM0YWQwYmVkYjRlYzg4OTIzYzcxNGUwODg4Yg==\" } }";
+
+        var client = createClient(url);
+        var properties = new Properties();
+
+        var throwable = assertThrows(NullPointerException.class, () -> client.decrypt(properties));
+        assertEquals("Cannot validate hash, missing Vault Transit Key", throwable.getMessage());
+
+        properties.put("gruntr__vault_transit_key", "keyname");
+        throwable = assertThrows(NullPointerException.class, () -> client.decrypt(properties));
+        assertEquals("Cannot validate hash, missing Vault host", throwable.getMessage());
+
+        properties.put("gruntr__vault_host", "http://localhost");
+        throwable = assertThrows(NullPointerException.class, () -> client.decrypt(properties));
+        assertEquals("Cannot validate hash, missing Vault Transit Path", throwable.getMessage());
+
+        properties.put("gruntr__vault_transit_path", "transit");
+        throwable = assertThrows(NullPointerException.class, () -> client.decrypt(properties));
+        assertEquals("Cannot validate hash, missing Vault SHA3 value", throwable.getMessage()) ;
+
+
+        properties.put("gruntr__sha3", "fake value");
+        MOCK_SERVER.enqueue(new MockResponse().setBody(mockBody));
+        var illegalStateException = assertThrows(IllegalStateException.class, () -> client.decrypt(properties));
+        assertEquals("Hash validation failed, gruntr__ values were tampered with?", illegalStateException.getMessage()) ;
+
+        MOCK_SERVER.takeRequest(); // dequeue request
+    }
+
+    @Test
+    void testVaultClientDecryptProperties() throws MalformedURLException, InterruptedException, VaultException {
+        var url = URI.create("http://localhost:" + MOCK_SERVER.getPort()).toURL();
+        var sha3ResultCheck = "{ \"data\": {\"plaintext\": \"OWVlYWUwMjU5NWQzMWRmNmFmYjhkZDlhMDI4NzllNzU0YzA4NTA3MTYzYzFhNDg0Y2IzY2FkMjUwYWE2MjhhZg==\" } }";
+        var mockBody = "{ \"data\": {\"plaintext\": \"bXkgdmVyeSBzZWN1cmUgdmFsdWU=\" } }";
+
+        var client = createClient(url);
+        var properties = createGruntrProperties();
+
+        properties.put("my.plaintext", "this is plain text");
+        properties.put("my.encryption", "vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==");
+
+        MOCK_SERVER.enqueue(new MockResponse().setBody(sha3ResultCheck));
+        MOCK_SERVER.enqueue(new MockResponse().setBody(mockBody));
+
+        var decryptedProperties = client.decrypt(properties);
+
+        assertEquals(decryptedProperties.get("my.plaintext"), properties.get("my.plaintext"));
+        assertEquals("my very secure value", decryptedProperties.get("my.encryption"));
+
+        assertEquals("/v1/transit/project_name/decrypt/appkey", MOCK_SERVER.takeRequest().getPath());
+        assertEquals("/v1/transit/project_name/decrypt/appkey", MOCK_SERVER.takeRequest().getPath());
+    }
+
     private VaultTransitRestClient createClient(URL url) {
         return VaultTransitRestClient
                 .builder()
@@ -155,5 +212,18 @@ class VaultRestClientTest {
                 .transitKeyName("appkey")
                 .token(VaultToken.of("root"))
                 .build();
+    }
+
+    private Properties createGruntrProperties() {
+        var properties = new Properties();
+
+        properties.put("gruntr__vault_transit_key", "keyname");
+        properties.put("gruntr__vault_host", "http://localhost:" + MOCK_SERVER.getPort());
+        properties.put("gruntr__vault_transit_path", "transit");
+        properties.put("gruntr__sha3", "vault:v1:9eeae02595d31df6afb8dd9a02879e754c08507163c1a484cb3cad250aa628af");
+
+        //if you want to render a "correct" Digest, look at the DigestUtilsTest to render a new one.
+
+        return properties;
     }
 }

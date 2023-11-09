@@ -36,6 +36,8 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Properties;
 
+import static java.util.Objects.requireNonNull;
+
 public final class VaultTransitRestClientImpl implements VaultTransitRestClient {
     public static final String GRUNTR__VAULT_TRANSIT_KEY = "gruntr__vault_transit_key";
     public static final String GRUNTR__VAULT_HOST = "gruntr__vault_host";
@@ -46,6 +48,8 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
     private static final String HEADER_X_VAULT_TOKEN = "X-Vault-Token";
     private static final String HEADER_ACCEPT = "Accept";
     private static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
+    private static final String GRUNTR__PREFIX = "gruntr__";
+    private static final String VAULT_PREFIX = "vault:";
     private final ObjectMapper mapper = new ObjectMapper();
     private final JsonFactory factory = mapper.getFactory();
     private final URL host;
@@ -145,8 +149,8 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
                 var stringValue = ((String) val).trim();
                 var keyName = (String) key;
 
-                if (!keyName.toLowerCase().startsWith("gruntr__")) {
-                    if (stringValue.startsWith("vault:")) {
+                if (!keyName.toLowerCase().startsWith(GRUNTR__PREFIX)) {
+                    if (stringValue.startsWith(VAULT_PREFIX)) {
                         try {
                             decryptedProperties.put(key, String.copyValueOf(decrypt(stringValue.toCharArray())));
                         } catch (VaultException e) {
@@ -171,13 +175,19 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
         properties.forEach((key, value) -> {
             try {
                 // the property key matches the keys required to be encrypted
-                if (keysToEncrypt.matcher((String) key).find()) {
+                var keyName = (String) key;
+                var stringValue = (String) value;
+
+                if (keysToEncrypt.matcher(keyName).find()) {
                     encryptedProperties.put(
                             key,
-                            String.copyValueOf(encrypt(((String) value).getBytes())));
+                            String.copyValueOf(
+                                    encrypt(stringValue.getBytes())
+                            )
+                    );
                 } else {
                     // there is no need to encrypt this key
-                    encryptedProperties.put(key, value);
+                    encryptedProperties.put(keyName, stringValue);
                 }
             } catch (VaultException e) {
                 throw new RuntimeException(e);
@@ -188,10 +198,10 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
     }
 
     private void validateGruntrSha(Properties properties) throws VaultException {
-        String vaultTransitKey = properties.getProperty(GRUNTR__VAULT_TRANSIT_KEY);
-        String vaultHost = properties.getProperty(GRUNTR__VAULT_HOST);
-        String vaultTransitPath = properties.getProperty(GRUNTR__VAULT_TRANSIT_PATH);
-        String gruntrSha3Value = properties.getProperty(GRUNTR__SHA_3);
+        var vaultTransitKey = requireNonNull(properties.getProperty(GRUNTR__VAULT_TRANSIT_KEY), "Cannot validate hash, missing Vault Transit Key");
+        var vaultHost = requireNonNull(properties.getProperty(GRUNTR__VAULT_HOST), "Cannot validate hash, missing Vault host");
+        var vaultTransitPath = requireNonNull(properties.getProperty(GRUNTR__VAULT_TRANSIT_PATH), "Cannot validate hash, missing Vault Transit Path");
+        var gruntrSha3Value = requireNonNull(properties.getProperty(GRUNTR__SHA_3), "Cannot validate hash, missing Vault SHA3 value");
 
         try {
             var sha3HexValue = this.decrypt(gruntrSha3Value.toCharArray());
@@ -215,8 +225,8 @@ public final class VaultTransitRestClientImpl implements VaultTransitRestClient 
             var stringValue = ((String) val).trim();
             var keyName = (String) key;
 
-            if (!keyName.toLowerCase().startsWith("gruntr__")) {
-                if (stringValue.startsWith("vault:")) {
+            if (!keyName.toLowerCase().startsWith(GRUNTR__PREFIX)) {
+                if (stringValue.startsWith(VAULT_PREFIX)) {
                     try {
                         encryptedProperties.put(
                                 key,

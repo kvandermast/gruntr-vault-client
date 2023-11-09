@@ -38,6 +38,9 @@ class DigestUtilsTest {
 
         assertNotNull(result);
         assertEquals("412e555fcbfc43f2e1ab2ed3d3b3bf5cc020dc4ad0bedb4ec88923c714e0888b", new String(result));
+
+        result = DigestUtils.sha3digest("http://localhost:8200", "transit", "keyname");
+        assertEquals("9eeae02595d31df6afb8dd9a02879e754c08507163c1a484cb3cad250aa628af", new String(result));
     }
 
     @Test
