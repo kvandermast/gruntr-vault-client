@@ -145,6 +145,7 @@ Give the example above, you run the CLI with the following parameters:
 java -jar ./gruntr-vault-client-cli.jar \ 
         rewrap \                                  # use the "rewrap" command 
         -i ./application-encrypted.properties \   # the encrypted properties file
+        -k :secrets                               # only encrypt passwords, tokens and secrets
         --token TOKEN_YOUR_RECEIVED \             # your vault token
         --hc-vault-server http://vault:8201 \     # point to your Vault Server
         --hc-transit-path transit/project_name \  # this is the mounted transit engine
