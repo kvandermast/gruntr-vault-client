@@ -16,6 +16,7 @@
 
 package io.acuz.gruntr.cli;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -26,6 +27,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("SpellCheckingInspection")
 class CliPropertiesTest {
+    @BeforeEach
+    void beforeEach() {
+        EncryptionKeys.clear();
+    }
+
     @Test
     void test_CliPropertiesBuilderWithoutParameters() {
         var builder = CliProperties.builder();
@@ -70,5 +76,35 @@ class CliPropertiesTest {
         assertEquals("transit/project_name", props.getHcTransitPath());
         assertEquals(Path.of("/tmp/application-encrypted.properties"), props.getInputFilePath());
         assertNull(props.getOutputFilePath());
+        assertNotNull(EncryptionKeys.compile());
+        assertEquals(".*(.*).*", EncryptionKeys.compile().pattern());
+    }
+
+    @Test
+    void test_CliPropertiesBuilderWithParametersAndCustomKeys() {
+        var builder = CliProperties.builder()
+                .parameters(
+                        new ArrayDeque<>(
+                                List.of("-i",
+                                        "/tmp/application-encrypted.properties",
+                                        "--token",
+                                        "token",
+                                        "--hc-vault-server",
+                                        "http://vault:8201",
+                                        "--hc-transit-path",
+                                        "transit/project_name",
+                                        "--hc-transit-key",
+                                        "appkey",
+                                        "-k",
+                                        ":secrets,office")
+                        )
+                );
+
+        var props = builder.build();
+
+        assertNotNull(props);
+
+        assertNotNull(EncryptionKeys.compile());
+        assertEquals(".*((secret|token|password)|office).*", EncryptionKeys.compile().pattern());
     }
 }

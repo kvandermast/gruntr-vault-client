@@ -240,6 +240,46 @@ class VaultTransitRestClientTest {
             assertEquals("/v1/transit/project_name/encrypt/appkey", MOCK_SERVER.takeRequest().getPath());
     }
 
+    @Test
+    void testVaultClientRewrapProperties() throws MalformedURLException, InterruptedException, VaultException {
+        var url = URI.create("http://localhost:" + MOCK_SERVER.getPort()).toURL();
+        var sha3ResultCheck = "{ \"data\": {\"plaintext\": \"OWVlYWUwMjU5NWQzMWRmNmFmYjhkZDlhMDI4NzllNzU0YzA4NTA3MTYzYzFhNDg0Y2IzY2FkMjUwYWE2MjhhZg==\" } }";
+        var mockBody = "{ \"data\": {\"ciphertext\": \"vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==\" } }";
+
+        var client = createClient(url);
+        var properties = createGruntrProperties();
+
+        properties.put("my.plaintext", "vault:v1:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==");
+        properties.put("my.secret", "vault:v1:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==");
+        properties.put("my.password", "vault:v1:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==");
+        properties.put("my.token", "vault:v1:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==");
+
+        // it should encode 4 properties + the hash
+        final var numberOfRequests = 5;
+
+        MOCK_SERVER.enqueue(new MockResponse().setBody(sha3ResultCheck));
+        for (int i = 0; i < numberOfRequests - 1; i++)
+            MOCK_SERVER.enqueue(new MockResponse().setBody(mockBody));
+
+        var encryptedProperties = client.rewrap(properties);
+
+        assertEquals(8, encryptedProperties.size());
+
+        assertEquals("vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==", encryptedProperties.get("my.plaintext"));
+        assertEquals("vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==", encryptedProperties.get("my.secret"));
+        assertEquals("vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==", encryptedProperties.get("my.password"));
+        assertEquals("vault:v2:pN9yeht0umD/TqT3tSpRGUoLUuTYazDPgxj/dkOJTULzFCv2vovHgbhBfh99EmD+wQ==", encryptedProperties.get("my.token"));
+
+        assertEquals("keyname", encryptedProperties.get(VaultTransitRestClient.GRUNTR__VAULT_TRANSIT_KEY));
+        assertEquals("transit", encryptedProperties.get(VaultTransitRestClient.GRUNTR__VAULT_TRANSIT_PATH));
+        assertEquals("http://localhost:" + MOCK_SERVER.getPort(), encryptedProperties.get(VaultTransitRestClient.GRUNTR__VAULT_HOST));
+        assertEquals("vault:v1:9eeae02595d31df6afb8dd9a02879e754c08507163c1a484cb3cad250aa628af", encryptedProperties.get(VaultTransitRestClient.GRUNTR__SHA_3));
+
+        assertEquals("/v1/transit/project_name/decrypt/appkey", MOCK_SERVER.takeRequest().getPath());
+        for (int i = 0; i < numberOfRequests-1; i++) //dequeue requests
+            assertEquals("/v1/transit/project_name/rewrap/appkey", MOCK_SERVER.takeRequest().getPath());
+    }
+
     private VaultTransitRestClient createClient(URL url) {
         return VaultTransitRestClient
                 .builder()
