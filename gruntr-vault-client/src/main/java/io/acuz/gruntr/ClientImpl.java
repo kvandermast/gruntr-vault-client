@@ -29,17 +29,14 @@ import java.util.Objects;
 import java.util.Properties;
 
 public final class ClientImpl implements Client {
-    private final Path path;
 
     private final VaultToken token;
 
     private final Properties encryptedProperties;
 
     public ClientImpl(Builder builder) {
-        this.path = builder.path;
         this.token = builder.token.copyOf();
-
-        this.encryptedProperties = readEncryptedProperties(this.path);
+        this.encryptedProperties = readEncryptedProperties(builder.path);
 
         builder.token.invalidate();
     }
@@ -113,7 +110,8 @@ public final class ClientImpl implements Client {
         }
 
         private void validate() {
-            Objects.requireNonNull(path);
+            Objects.requireNonNull(path, "No path parameter provided");
+            Objects.requireNonNull(token, "No token parameter provided");
         }
     }
 }

@@ -29,6 +29,8 @@ class ClientTest {
     @Test
     void test_createANewClientWithoutParameters() {
         assertThrows(NullPointerException.class, () -> ClientImpl.builder().build());
+        assertThrows(NullPointerException.class, () -> ClientImpl.builder().setPath(Path.of("/tmp")).build());
+        assertThrows(NullPointerException.class, () -> ClientImpl.builder().setToken(VaultToken.of("test")).build());
     }
 
     @Test
